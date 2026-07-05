@@ -9,6 +9,7 @@ const modules = [
   { href: "/calendrier", label: "Calendrier" },
   { href: "/inventaire", label: "Inventaire" },
   { href: "/comptabilite", label: "Comptabilité" },
+  { href: "/assistant", label: "Assistant IA" },
 ];
 
 export default async function DashboardLayout({

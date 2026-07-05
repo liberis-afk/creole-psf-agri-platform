@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { EditCropForm } from "./edit-form";
 import { deleteCrop, updateCrop } from "../actions";
+import { CropRecommendation } from "@/components/crop-recommendation";
 
 const stageLabels: Record<string, string> = {
   PLANIFIEE: "Planifiée",
@@ -75,6 +76,8 @@ export default async function CropDetailPage({
           {crop.actualYield != null && <p>Rendement réel : {crop.actualYield}</p>}
         </div>
       )}
+
+      <CropRecommendation cropId={crop.id} />
     </div>
   );
 }
