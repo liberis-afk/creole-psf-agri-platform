@@ -7,12 +7,20 @@ export default function Home() {
       <p className="max-w-md opacity-70">
         Plateforme numérique de gestion agricole multi-exploitations.
       </p>
-      <Link
-        href="/login"
-        className="rounded bg-foreground px-5 py-3 text-background"
-      >
-        Se connecter
-      </Link>
+      <div className="flex gap-4">
+        <Link
+          href="/login"
+          className="rounded bg-foreground px-5 py-3 text-background"
+        >
+          Se connecter
+        </Link>
+        <Link
+          href="/inscription"
+          className="rounded border border-black/20 px-5 py-3 dark:border-white/20"
+        >
+          Créer un compte
+        </Link>
+      </div>
     </div>
   );
 }

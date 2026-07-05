@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 
@@ -58,6 +59,12 @@ export default function LoginPage() {
         >
           {loading ? "Connexion..." : "Se connecter"}
         </button>
+        <p className="text-sm opacity-70">
+          Pas encore de compte ?{" "}
+          <Link href="/inscription" className="underline">
+            Créer un compte
+          </Link>
+        </p>
       </form>
     </div>
   );

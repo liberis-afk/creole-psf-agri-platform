@@ -10,10 +10,11 @@ export const authConfig = {
     authorized({ auth, request }) {
       const isLoggedIn = !!auth?.user;
       const { pathname } = request.nextUrl;
-      const isPublicRoute = pathname === "/" || pathname.startsWith("/login");
+      const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/inscription");
+      const isPublicRoute = pathname === "/" || isAuthPage;
 
       if (isPublicRoute) {
-        return isLoggedIn && pathname.startsWith("/login")
+        return isLoggedIn && isAuthPage
           ? Response.redirect(new URL("/fermes", request.nextUrl))
           : true;
       }
