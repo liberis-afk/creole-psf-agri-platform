@@ -35,6 +35,14 @@ npx prisma db push                                # applique prisma/schema.prism
 
 Copier l'URL TCP `postgres://...` affichée par `prisma dev ls` dans `DATABASE_URL` (`.env`).
 
+## Tests
+
+```bash
+npm run test
+```
+
+Les tests (Vitest) appellent directement les server actions et exécutent de vraies requêtes Prisma contre la base de développement locale — celle-ci doit donc tourner (`npx prisma dev ls`). Ils s'exécutent dans un seul contexte de module partagé (`isolate: false` dans `vitest.config.ts`) : la base de dev locale (WASM) ne supporte pas bien plusieurs pools de connexions ouverts/fermés en parallèle.
+
 ## Structure
 
 - `src/app/` — routes et pages (App Router)
