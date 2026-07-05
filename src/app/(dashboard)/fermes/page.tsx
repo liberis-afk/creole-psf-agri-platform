@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createFarm } from "./actions";
@@ -35,17 +36,19 @@ export default async function FermesPage() {
         ) : (
           <ul className="flex flex-col gap-2">
             {memberships.map((m) => (
-              <li
-                key={m.id}
-                className="flex items-center justify-between rounded border border-black/10 px-4 py-3 dark:border-white/10"
-              >
-                <div>
-                  <p className="font-medium">{m.farm.name}</p>
-                  {m.farm.location && (
-                    <p className="text-sm opacity-70">{m.farm.location}</p>
-                  )}
-                </div>
-                <span className="text-sm opacity-70">{roleLabels[m.role] ?? m.role}</span>
+              <li key={m.id}>
+                <Link
+                  href={`/fermes/${m.farmId}`}
+                  className="flex items-center justify-between rounded border border-black/10 px-4 py-3 hover:bg-black/[.02] dark:border-white/10 dark:hover:bg-white/[.03]"
+                >
+                  <div>
+                    <p className="font-medium">{m.farm.name}</p>
+                    {m.farm.location && (
+                      <p className="text-sm opacity-70">{m.farm.location}</p>
+                    )}
+                  </div>
+                  <span className="text-sm opacity-70">{roleLabels[m.role] ?? m.role}</span>
+                </Link>
               </li>
             ))}
           </ul>
