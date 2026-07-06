@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { auth } from "@/lib/auth";
-import { resend } from "@/lib/resend";
+import { sendMail } from "@/lib/mailer";
 import { prisma } from "@/lib/prisma";
 import { createInvitation, revokeInvitation } from "./invitations-actions";
 import { createTestUser, createTestFarm, addMembership, cleanup } from "@/test/helpers";
 
 const mockedAuth = vi.mocked(auth);
-const mockedSend = vi.mocked(resend.emails.send);
+const mockedSend = vi.mocked(sendMail);
 
 describe("farm invitations", () => {
   const farmIds: string[] = [];
@@ -44,12 +44,11 @@ describe("farm invitations", () => {
     expect(mockedSend).toHaveBeenCalledOnce();
   });
 
-  it("surfaces a Resend error and does not create an invitation row", async () => {
+  it("surfaces a mail-send error and does not create an invitation row", async () => {
     const { admin, farm } = await setupFarmWithAdmin();
     mockedAuth.mockResolvedValue({ user: { id: admin.id } } as never);
     mockedSend.mockResolvedValueOnce({
-      data: null,
-      error: { name: "validation_error", message: "You can only send testing emails to your own email address" },
+      error: { message: "You can only send testing emails to your own email address" },
     } as never);
 
     const formData = new FormData();

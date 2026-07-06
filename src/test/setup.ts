@@ -43,18 +43,19 @@ const authMocks: AuthMocks =
 
 vi.mock("@/lib/auth", () => authMocks);
 
-// Invitation emails would otherwise hit the real Resend API (and require a
-// real RESEND_API_KEY) during tests. Same shared-instance reasoning as above.
-type ResendMocks = { send: ReturnType<typeof vi.fn> };
-const globalForResendMock = globalThis as unknown as { __resendMocks__?: ResendMocks };
-const resendMocks: ResendMocks =
-  globalForResendMock.__resendMocks__ ??
-  (globalForResendMock.__resendMocks__ = {
-    send: vi.fn().mockResolvedValue({ data: { id: "mock-email-id" }, error: null }),
+// Invitation emails would otherwise hit real Gmail SMTP (and require real
+// GMAIL_USER/GMAIL_APP_PASSWORD) during tests. Same shared-instance reasoning
+// as above.
+type MailerMocks = { sendMail: ReturnType<typeof vi.fn> };
+const globalForMailerMock = globalThis as unknown as { __mailerMocks__?: MailerMocks };
+const mailerMocks: MailerMocks =
+  globalForMailerMock.__mailerMocks__ ??
+  (globalForMailerMock.__mailerMocks__ = {
+    sendMail: vi.fn().mockResolvedValue({ error: null }),
   });
 
-vi.mock("@/lib/resend", () => ({
-  resend: { emails: { send: resendMocks.send } },
+vi.mock("@/lib/mailer", () => ({
+  sendMail: mailerMocks.sendMail,
   EMAIL_FROM: "CREOLE PSF <test@test.local>",
   getAppUrl: () => "http://localhost:3000",
 }));

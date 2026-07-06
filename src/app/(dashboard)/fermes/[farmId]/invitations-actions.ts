@@ -3,7 +3,7 @@
 import { randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { resend, EMAIL_FROM, getAppUrl } from "@/lib/resend";
+import { sendMail, getAppUrl } from "@/lib/mailer";
 import { InvitationEmail } from "@/emails/invitation-email";
 import { requireFarmAdmin } from "./actions";
 
@@ -71,12 +71,9 @@ export async function createInvitation(farmId: string, formData: FormData) {
   const expiresAt = new Date(Date.now() + INVITATION_TTL_MS);
   const inviteUrl = `${getAppUrl()}/invite/${token}`;
 
-  // Send before persisting: if Resend rejects the email (e.g. sandbox mode
-  // restricts onboarding@resend.dev to the account owner's own address until
-  // a domain is verified), we don't want an Invitation row for an email that
-  // was never actually sent.
-  const { error } = await resend.emails.send({
-    from: EMAIL_FROM,
+  // Send before persisting: if the mail server rejects the email, we don't
+  // want an Invitation row for an email that was never actually sent.
+  const { error } = await sendMail({
     to: email,
     subject: `Invitation à rejoindre ${farm.name} sur CREOLE PSF`,
     react: InvitationEmail({ farmName: farm.name, role, inviteUrl }),
