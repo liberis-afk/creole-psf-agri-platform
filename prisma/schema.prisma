@@ -53,6 +53,13 @@ enum TransactionType {
   REVENU
 }
 
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
+}
+
 // --- Auth.js models ---
 
 model Account {
@@ -103,9 +110,10 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts    Account[]
-  sessions    Session[]
-  memberships Membership[]
+  accounts        Account[]
+  sessions        Session[]
+  memberships     Membership[]
+  sentInvitations Invitation[]
 }
 
 /// Isole chaque ferme : chaque utilisateur appartient à une ou plusieurs fermes via Membership.
@@ -116,10 +124,11 @@ model Farm {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  memberships Membership[]
-  parcels     Parcel[]
-  inventory   InventoryItem[]
+  memberships  Membership[]
+  parcels      Parcel[]
+  inventory    InventoryItem[]
   transactions Transaction[]
+  invitations  Invitation[]
 }
 
 model Membership {
@@ -209,4 +218,23 @@ model Transaction {
 
   farmId String
   farm   Farm   @relation(fields: [farmId], references: [id], onDelete: Cascade)
+}
+
+model Invitation {
+  id        String           @id @default(cuid())
+  email     String
+  role      FarmRole
+  status    InvitationStatus @default(PENDING)
+  token     String           @unique
+  expiresAt DateTime
+  createdAt DateTime         @default(now())
+
+  farmId String
+  farm   Farm   @relation(fields: [farmId], references: [id], onDelete: Cascade)
+
+  invitedById String
+  invitedBy   User   @relation(fields: [invitedById], references: [id])
+
+  @@index([email])
+  @@index([farmId, status])
 }

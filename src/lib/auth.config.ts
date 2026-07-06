@@ -11,7 +11,8 @@ export const authConfig = {
       const isLoggedIn = !!auth?.user;
       const { pathname } = request.nextUrl;
       const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/inscription");
-      const isPublicRoute = pathname === "/" || isAuthPage;
+      const isInvitePage = pathname.startsWith("/invite");
+      const isPublicRoute = pathname === "/" || isAuthPage || isInvitePage;
 
       if (isPublicRoute) {
         return isLoggedIn && isAuthPage

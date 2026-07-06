@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { addMember, removeMember, updateMemberRole } from "./actions";
+import { removeMember, updateMemberRole } from "./actions";
 import { createTestUser, createTestFarm, addMembership, cleanup } from "@/test/helpers";
 
 const mockedAuth = vi.mocked(auth);
@@ -22,49 +22,6 @@ describe("farm member management", () => {
     farmIds.push(farm.id);
     return { admin, farm };
   }
-
-  it("lets an admin add an existing user as a member", async () => {
-    const { admin, farm } = await setupFarmWithAdmin();
-    const newUser = await createTestUser("newmember");
-    userIds.push(newUser.id);
-
-    mockedAuth.mockResolvedValue({ user: { id: admin.id } } as never);
-
-    const formData = new FormData();
-    formData.set("email", newUser.email);
-    formData.set("role", "MANAGER");
-
-    await addMember(farm.id, formData);
-
-    const membership = await prisma.membership.findUnique({
-      where: { userId_farmId: { userId: newUser.id, farmId: farm.id } },
-    });
-    expect(membership).toMatchObject({ role: "MANAGER" });
-  });
-
-  it("rejects adding a member when the email has no account", async () => {
-    const { admin, farm } = await setupFarmWithAdmin();
-    mockedAuth.mockResolvedValue({ user: { id: admin.id } } as never);
-
-    const formData = new FormData();
-    formData.set("email", "does-not-exist@test.local");
-
-    await expect(addMember(farm.id, formData)).rejects.toThrow(/aucun utilisateur/i);
-  });
-
-  it("rejects a non-admin trying to add a member", async () => {
-    const { farm } = await setupFarmWithAdmin();
-    const employee = await createTestUser("employee");
-    await addMembership(employee.id, farm.id, "EMPLOYEE");
-    userIds.push(employee.id);
-
-    mockedAuth.mockResolvedValue({ user: { id: employee.id } } as never);
-
-    const formData = new FormData();
-    formData.set("email", "whoever@test.local");
-
-    await expect(addMember(farm.id, formData)).rejects.toThrow(/réservée aux administrateurs/i);
-  });
 
   it("blocks demoting the farm's last admin", async () => {
     const { admin, farm } = await setupFarmWithAdmin();

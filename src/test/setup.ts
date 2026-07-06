@@ -20,8 +20,40 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
-vi.mock("@/lib/auth", () => ({
-  auth: vi.fn(),
+// The real "next-auth" package fails to resolve "next/server" under Vitest's
+// Node environment. Actions only need the AuthError class for instanceof
+// checks, so a minimal stand-in avoids loading the real package.
+vi.mock("next-auth", () => ({
+  AuthError: class AuthError extends Error {},
+}));
+
+// vitest.config.ts runs with isolate:false and fileParallelism:false so every
+// test file shares one Prisma client (see below). setupFiles re-run this
+// module once per test file, and each run of this factory would normally
+// hand back a brand new vi.fn(). But non-mocked production modules (like
+// fermes/[farmId]/actions.ts) are only ever imported once and keep whichever
+// mock instance existed at that time — so a later test file updating "its"
+// mock would silently update a disconnected instance nobody reads from.
+// Caching the mock functions on globalThis keeps a single shared instance
+// across every test file.
+type AuthMocks = { auth: ReturnType<typeof vi.fn>; signIn: ReturnType<typeof vi.fn> };
+const globalForAuthMock = globalThis as unknown as { __authMocks__?: AuthMocks };
+const authMocks: AuthMocks =
+  globalForAuthMock.__authMocks__ ?? (globalForAuthMock.__authMocks__ = { auth: vi.fn(), signIn: vi.fn() });
+
+vi.mock("@/lib/auth", () => authMocks);
+
+// Invitation emails would otherwise hit the real Resend API (and require a
+// real RESEND_API_KEY) during tests. Same shared-instance reasoning as above.
+type ResendMocks = { send: ReturnType<typeof vi.fn> };
+const globalForResendMock = globalThis as unknown as { __resendMocks__?: ResendMocks };
+const resendMocks: ResendMocks =
+  globalForResendMock.__resendMocks__ ?? (globalForResendMock.__resendMocks__ = { send: vi.fn() });
+
+vi.mock("@/lib/resend", () => ({
+  resend: { emails: { send: resendMocks.send } },
+  EMAIL_FROM: "CREOLE PSF <test@test.local>",
+  getAppUrl: () => "http://localhost:3000",
 }));
 
 // The local dev Postgres (WASM, effectively single-connection) can drop

@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 const ROLES = ["ADMIN", "MANAGER", "EMPLOYEE"] as const;
 type Role = (typeof ROLES)[number];
 
-async function requireFarmAdmin(farmId: string) {
+export async function requireFarmAdmin(farmId: string) {
   const session = await auth();
   if (!session?.user?.id) {
     throw new Error("Non authentifié");
@@ -20,6 +20,8 @@ async function requireFarmAdmin(farmId: string) {
   if (!membership || membership.role !== "ADMIN") {
     throw new Error("Action réservée aux administrateurs de la ferme");
   }
+
+  return session.user.id;
 }
 
 async function assertNotLastAdmin(farmId: string, membershipId: string) {
@@ -34,40 +36,6 @@ async function assertNotLastAdmin(farmId: string, membershipId: string) {
       throw new Error("La ferme doit conserver au moins un administrateur");
     }
   }
-}
-
-export async function addMember(farmId: string, formData: FormData) {
-  await requireFarmAdmin(farmId);
-
-  const email = formData.get("email");
-  const role = formData.get("role");
-  const finalRole: Role = typeof role === "string" && (ROLES as readonly string[]).includes(role)
-    ? (role as Role)
-    : "EMPLOYEE";
-
-  if (typeof email !== "string" || !email.trim()) {
-    throw new Error("Email requis");
-  }
-
-  const user = await prisma.user.findUnique({ where: { email: email.trim() } });
-
-  if (!user) {
-    throw new Error("Aucun utilisateur avec cet email. Il doit d'abord créer un compte.");
-  }
-
-  const existing = await prisma.membership.findUnique({
-    where: { userId_farmId: { userId: user.id, farmId } },
-  });
-
-  if (existing) {
-    throw new Error("Cet utilisateur est déjà membre de la ferme");
-  }
-
-  await prisma.membership.create({
-    data: { userId: user.id, farmId, role: finalRole },
-  });
-
-  revalidatePath(`/fermes/${farmId}`);
 }
 
 export async function updateMemberRole(farmId: string, membershipId: string, formData: FormData) {
