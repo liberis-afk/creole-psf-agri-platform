@@ -71,6 +71,33 @@ enum InvitationStatus {
   REVOKED
 }
 
+enum EquipementStatus {
+  OPERATIONNEL
+  EN_PANNE
+  EN_MAINTENANCE
+  HORS_SERVICE
+}
+
+enum WorkOrderType {
+  REPARATION
+  MAINTENANCE_PREVENTIVE
+  INSPECTION
+}
+
+enum WorkOrderStatus {
+  OUVERT
+  EN_COURS
+  TERMINE
+  ANNULE
+}
+
+enum Priorite {
+  BASSE
+  NORMALE
+  HAUTE
+  URGENTE
+}
+
 // --- Auth.js models ---
 
 model Account {
@@ -121,11 +148,12 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts        Account[]
-  sessions        Session[]
-  memberships     Membership[]
-  sentInvitations Invitation[]
-  activitesCreees Activite[]
+  accounts           Account[]
+  sessions           Session[]
+  memberships        Membership[]
+  sentInvitations    Invitation[]
+  activitesCreees    Activite[]
+  workOrdersAssignes WorkOrder[]
 }
 
 /// Isole chaque ferme : chaque utilisateur appartient à une ou plusieurs fermes via Membership.
@@ -142,6 +170,7 @@ model Farm {
   transactions Transaction[]
   invitations  Invitation[]
   saisons      Saison[]
+  equipements  Equipement[]
 }
 
 model Membership {
@@ -286,4 +315,41 @@ model Invitation {
 
   @@index([email])
   @@index([farmId, status])
+}
+
+model Equipement {
+  id              String           @id @default(cuid())
+  farmId          String
+  farm            Farm             @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  identifiant     String
+  nom             String
+  type            String?
+  statut          EquipementStatus @default(OPERATIONNEL)
+  dateAcquisition DateTime?
+  createdAt       DateTime         @default(now())
+
+  workOrders WorkOrder[]
+
+  @@unique([farmId, identifiant])
+  @@index([farmId])
+}
+
+model WorkOrder {
+  id            String          @id @default(cuid())
+  equipementId  String
+  equipement    Equipement      @relation(fields: [equipementId], references: [id], onDelete: Cascade)
+  type          WorkOrderType
+  description   String
+  statut        WorkOrderStatus @default(OUVERT)
+  priorite      Priorite        @default(NORMALE)
+  dateOuverture DateTime        @default(now())
+  dateCloture   DateTime?
+  coutEstime    Float?
+  coutReel      Float?
+  createdAt     DateTime        @default(now())
+
+  assigneAId String?
+  assigneA   User?   @relation(fields: [assigneAId], references: [id])
+
+  @@index([equipementId, statut])
 }

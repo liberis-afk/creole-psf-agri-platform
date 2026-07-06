@@ -9,6 +9,7 @@ import {
   CalendarDays,
   CalendarRange,
   Boxes,
+  Wrench,
   Wallet,
   Bot,
 } from "lucide-react";
@@ -21,6 +22,7 @@ const modules = [
   { href: "/cultures", label: "Cultures", icon: Sprout },
   { href: "/calendrier", label: "Calendrier", icon: CalendarDays },
   { href: "/inventaire", label: "Inventaire", icon: Boxes },
+  { href: "/equipements", label: "Équipements", icon: Wrench },
   { href: "/comptabilite", label: "Comptabilité", icon: Wallet },
   { href: "/assistant", label: "Assistant IA", icon: Bot },
 ];
