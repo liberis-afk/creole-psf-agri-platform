@@ -7,6 +7,7 @@ import {
   MapPin,
   Sprout,
   CalendarDays,
+  CalendarRange,
   Boxes,
   Wallet,
   Bot,
@@ -15,6 +16,7 @@ import { cn } from "@/lib/cn";
 
 const modules = [
   { href: "/fermes", label: "Fermes", icon: Home },
+  { href: "/saisons", label: "Saisons", icon: CalendarRange },
   { href: "/parcelles", label: "Parcelles", icon: MapPin },
   { href: "/cultures", label: "Cultures", icon: Sprout },
   { href: "/calendrier", label: "Calendrier", icon: CalendarDays },

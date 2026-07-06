@@ -65,9 +65,14 @@ export async function createCulture(formData: FormData) {
 
   const variete = formData.get("variete");
 
+  const activeSaison = await prisma.saison.findFirst({
+    where: { farmId: parcelle.farmId, statut: "EN_COURS" },
+  });
+
   await prisma.culture.create({
     data: {
       parcelleId,
+      saisonId: activeSaison?.id ?? null,
       nomCulture: nomCulture.trim(),
       variete: typeof variete === "string" && variete.trim() ? variete.trim() : null,
       dateDebut: parseDateOrNull(formData.get("dateDebut")),

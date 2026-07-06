@@ -41,6 +41,38 @@ describe("Cultures actions", () => {
     expect(culture.dateDebut?.toISOString().slice(0, 10)).toBe("2026-06-01");
   });
 
+  it("associates a new culture with the farm's active saison", async () => {
+    const { user, farm, parcelle } = await setupFarmWithParcelle("ADMIN");
+    mockedAuth.mockResolvedValue({ user: { id: user.id } } as never);
+
+    const saison = await prisma.saison.create({
+      data: { farmId: farm.id, nom: "Saison active", annee: 2026 },
+    });
+
+    const formData = new FormData();
+    formData.set("parcelleId", parcelle.id);
+    formData.set("nomCulture", "Riz");
+
+    await createCulture(formData);
+
+    const culture = await prisma.culture.findFirstOrThrow({ where: { parcelleId: parcelle.id } });
+    expect(culture.saisonId).toBe(saison.id);
+  });
+
+  it("leaves saisonId null when the farm has no active saison", async () => {
+    const { user, parcelle } = await setupFarmWithParcelle("ADMIN");
+    mockedAuth.mockResolvedValue({ user: { id: user.id } } as never);
+
+    const formData = new FormData();
+    formData.set("parcelleId", parcelle.id);
+    formData.set("nomCulture", "Sans saison");
+
+    await createCulture(formData);
+
+    const culture = await prisma.culture.findFirstOrThrow({ where: { parcelleId: parcelle.id } });
+    expect(culture.saisonId).toBeNull();
+  });
+
   it("rejects an employee creating a culture", async () => {
     const { user, parcelle } = await setupFarmWithParcelle("EMPLOYEE");
     mockedAuth.mockResolvedValue({ user: { id: user.id } } as never);

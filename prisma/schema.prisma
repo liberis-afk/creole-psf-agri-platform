@@ -39,6 +39,11 @@ enum ActiviteType {
   RECOLTE
 }
 
+enum SaisonStatus {
+  EN_COURS
+  TERMINEE
+}
+
 enum TaskStatus {
   A_FAIRE
   EN_COURS
@@ -136,6 +141,7 @@ model Farm {
   inventory    InventoryItem[]
   transactions Transaction[]
   invitations  Invitation[]
+  saisons      Saison[]
 }
 
 model Membership {
@@ -174,6 +180,7 @@ model Culture {
   parcelleId String
   parcelle   Parcelle      @relation(fields: [parcelleId], references: [id], onDelete: Cascade)
   saisonId   String?
+  saison     Saison?       @relation(fields: [saisonId], references: [id], onDelete: SetNull)
   nomCulture String
   variete    String?
   dateDebut  DateTime?
@@ -203,6 +210,22 @@ model Activite {
 
   @@index([cultureId])
   @@index([type])
+}
+
+model Saison {
+  id        String       @id @default(cuid())
+  farmId    String
+  farm      Farm         @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  nom       String
+  annee     Int
+  dateDebut DateTime?
+  dateFin   DateTime?
+  statut    SaisonStatus @default(EN_COURS)
+  createdAt DateTime     @default(now())
+
+  cultures Culture[]
+
+  @@index([farmId, statut])
 }
 
 model Task {
