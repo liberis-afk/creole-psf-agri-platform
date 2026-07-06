@@ -44,6 +44,27 @@ describe("farm invitations", () => {
     expect(mockedSend).toHaveBeenCalledOnce();
   });
 
+  it("surfaces a Resend error and does not create an invitation row", async () => {
+    const { admin, farm } = await setupFarmWithAdmin();
+    mockedAuth.mockResolvedValue({ user: { id: admin.id } } as never);
+    mockedSend.mockResolvedValueOnce({
+      data: null,
+      error: { name: "validation_error", message: "You can only send testing emails to your own email address" },
+    } as never);
+
+    const formData = new FormData();
+    formData.set("email", "blocked@test.local");
+
+    await expect(createInvitation(farm.id, formData)).rejects.toThrow(
+      /échec de l'envoi.*own email address/i,
+    );
+
+    const invitation = await prisma.invitation.findFirst({
+      where: { farmId: farm.id, email: "blocked@test.local" },
+    });
+    expect(invitation).toBeNull();
+  });
+
   it("rejects a non-admin trying to invite", async () => {
     const { farm } = await setupFarmWithAdmin();
     const employee = await createTestUser("employee");
@@ -67,9 +88,6 @@ describe("farm invitations", () => {
     await addMembership(existingMember.id, farm.id, "EMPLOYEE");
     userIds.push(existingMember.id);
 
-    if (process.env.DEBUG_REQUIRE_FARM_ADMIN) {
-      console.error("DEBUG invitations setting mock", { adminId: admin.id, farmId: farm.id });
-    }
     mockedAuth.mockResolvedValue({ user: { id: admin.id } } as never);
 
     const formData = new FormData();
@@ -80,9 +98,6 @@ describe("farm invitations", () => {
 
   it("rejects a duplicate pending invitation for the same email", async () => {
     const { admin, farm } = await setupFarmWithAdmin();
-    if (process.env.DEBUG_REQUIRE_FARM_ADMIN) {
-      console.error("DEBUG invitations setting mock", { adminId: admin.id, farmId: farm.id });
-    }
     mockedAuth.mockResolvedValue({ user: { id: admin.id } } as never);
 
     const formData = new FormData();
@@ -94,9 +109,6 @@ describe("farm invitations", () => {
 
   it("lets an admin revoke a pending invitation", async () => {
     const { admin, farm } = await setupFarmWithAdmin();
-    if (process.env.DEBUG_REQUIRE_FARM_ADMIN) {
-      console.error("DEBUG invitations setting mock", { adminId: admin.id, farmId: farm.id });
-    }
     mockedAuth.mockResolvedValue({ user: { id: admin.id } } as never);
 
     const formData = new FormData();
@@ -115,9 +127,6 @@ describe("farm invitations", () => {
 
   it("allows re-inviting the same email after the prior invitation was revoked", async () => {
     const { admin, farm } = await setupFarmWithAdmin();
-    if (process.env.DEBUG_REQUIRE_FARM_ADMIN) {
-      console.error("DEBUG invitations setting mock", { adminId: admin.id, farmId: farm.id });
-    }
     mockedAuth.mockResolvedValue({ user: { id: admin.id } } as never);
 
     const formData = new FormData();

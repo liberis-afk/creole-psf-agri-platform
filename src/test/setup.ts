@@ -48,7 +48,10 @@ vi.mock("@/lib/auth", () => authMocks);
 type ResendMocks = { send: ReturnType<typeof vi.fn> };
 const globalForResendMock = globalThis as unknown as { __resendMocks__?: ResendMocks };
 const resendMocks: ResendMocks =
-  globalForResendMock.__resendMocks__ ?? (globalForResendMock.__resendMocks__ = { send: vi.fn() });
+  globalForResendMock.__resendMocks__ ??
+  (globalForResendMock.__resendMocks__ = {
+    send: vi.fn().mockResolvedValue({ data: { id: "mock-email-id" }, error: null }),
+  });
 
 vi.mock("@/lib/resend", () => ({
   resend: { emails: { send: resendMocks.send } },

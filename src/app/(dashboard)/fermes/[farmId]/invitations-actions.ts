@@ -69,6 +69,22 @@ export async function createInvitation(farmId: string, formData: FormData) {
 
   const token = randomBytes(32).toString("hex");
   const expiresAt = new Date(Date.now() + INVITATION_TTL_MS);
+  const inviteUrl = `${getAppUrl()}/invite/${token}`;
+
+  // Send before persisting: if Resend rejects the email (e.g. sandbox mode
+  // restricts onboarding@resend.dev to the account owner's own address until
+  // a domain is verified), we don't want an Invitation row for an email that
+  // was never actually sent.
+  const { error } = await resend.emails.send({
+    from: EMAIL_FROM,
+    to: email,
+    subject: `Invitation à rejoindre ${farm.name} sur CREOLE PSF`,
+    react: InvitationEmail({ farmName: farm.name, role, inviteUrl }),
+  });
+
+  if (error) {
+    throw new Error(`Échec de l'envoi de l'email d'invitation : ${error.message}`);
+  }
 
   await prisma.invitation.create({
     data: {
@@ -79,15 +95,6 @@ export async function createInvitation(farmId: string, formData: FormData) {
       expiresAt,
       invitedById: userId,
     },
-  });
-
-  const inviteUrl = `${getAppUrl()}/invite/${token}`;
-
-  await resend.emails.send({
-    from: EMAIL_FROM,
-    to: email,
-    subject: `Invitation à rejoindre ${farm.name} sur CREOLE PSF`,
-    react: InvitationEmail({ farmName: farm.name, role, inviteUrl }),
   });
 
   revalidatePath(`/fermes/${farmId}`);
