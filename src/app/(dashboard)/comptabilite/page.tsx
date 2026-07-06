@@ -1,7 +1,11 @@
 import Link from "next/link";
+import { TrendingUp, TrendingDown, Scale, Plus } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { CreateTransactionForm } from "@/components/create-transaction-form";
+import { PageHeader } from "@/components/ui/page-header";
+import { Card } from "@/components/ui/card";
+import { StatTile } from "@/components/ui/stat-tile";
 
 const typeLabels: Record<string, string> = {
   DEPENSE: "Dépense",
@@ -41,47 +45,74 @@ export default async function ComptabilitePage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div>
-        <h1 className="text-2xl font-semibold">Comptabilité agricole</h1>
-        <p className="text-sm opacity-70">Dépenses, revenus et rapports financiers.</p>
-      </div>
+      <PageHeader
+        title="Comptabilité agricole"
+        description="Dépenses, revenus et rapports financiers."
+      />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded border border-black/10 px-4 py-3 dark:border-white/10">
-          <p className="text-sm opacity-70">Revenus</p>
-          <p className="text-xl font-semibold">{totalRevenu.toFixed(2)}</p>
-        </div>
-        <div className="rounded border border-black/10 px-4 py-3 dark:border-white/10">
-          <p className="text-sm opacity-70">Dépenses</p>
-          <p className="text-xl font-semibold">{totalDepense.toFixed(2)}</p>
-        </div>
-        <div className="rounded border border-black/10 px-4 py-3 dark:border-white/10">
-          <p className="text-sm opacity-70">Solde</p>
-          <p className={`text-xl font-semibold ${solde < 0 ? "text-red-600" : ""}`}>
-            {solde.toFixed(2)}
-          </p>
-        </div>
+        <StatTile
+          label="Revenus"
+          value={totalRevenu.toFixed(2)}
+          icon={<TrendingUp className="h-5 w-5" strokeWidth={2} />}
+          tone="positive"
+        />
+        <StatTile
+          label="Dépenses"
+          value={totalDepense.toFixed(2)}
+          icon={<TrendingDown className="h-5 w-5" strokeWidth={2} />}
+          tone="negative"
+        />
+        <StatTile
+          label="Solde"
+          value={solde.toFixed(2)}
+          icon={<Scale className="h-5 w-5" strokeWidth={2} />}
+          tone={solde < 0 ? "negative" : "positive"}
+        />
       </div>
 
       <div>
-        <h2 className="mb-2 font-medium">Toutes les transactions</h2>
+        <h2 className="mb-3 text-sm font-semibold text-stone-500 dark:text-stone-400">
+          Toutes les transactions
+        </h2>
         {transactions.length === 0 ? (
-          <p className="text-sm opacity-70">Aucune transaction pour le moment.</p>
+          <Card className="p-6 text-sm text-muted">Aucune transaction pour le moment.</Card>
         ) : (
           <ul className="flex flex-col gap-2">
             {transactions.map((t) => (
               <li key={t.id}>
                 <Link
                   href={`/comptabilite/${t.id}`}
-                  className="flex items-center justify-between rounded border border-black/10 px-4 py-3 hover:bg-black/[.02] dark:border-white/10 dark:hover:bg-white/[.03]"
+                  className="flex items-center justify-between rounded-xl border border-surface-border bg-surface px-4 py-3 shadow-sm shadow-stone-900/[0.03] transition hover:-translate-y-0.5 hover:shadow-md hover:shadow-stone-900/[0.06]"
                 >
-                  <div>
-                    <p className="font-medium">{t.description || typeLabels[t.type]}</p>
-                    <p className="text-sm opacity-70">
-                      {t.farm.name} — {t.date.toLocaleDateString("fr-FR")}
-                    </p>
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
+                        t.type === "DEPENSE"
+                          ? "bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-300"
+                          : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
+                      }`}
+                    >
+                      {t.type === "DEPENSE" ? (
+                        <TrendingDown className="h-4.5 w-4.5" strokeWidth={2} />
+                      ) : (
+                        <TrendingUp className="h-4.5 w-4.5" strokeWidth={2} />
+                      )}
+                    </div>
+                    <div>
+                      <p className="font-medium">{t.description || typeLabels[t.type]}</p>
+                      <p className="text-sm text-muted">
+                        {t.farm.name} — {t.date.toLocaleDateString("fr-FR")}
+                      </p>
+                    </div>
                   </div>
-                  <span className={t.type === "DEPENSE" ? "text-red-600" : "text-green-600"}>
+                  <span
+                    className={`font-medium ${
+                      t.type === "DEPENSE"
+                        ? "text-red-600 dark:text-red-400"
+                        : "text-emerald-600 dark:text-emerald-400"
+                    }`}
+                  >
                     {t.type === "DEPENSE" ? "-" : "+"}
                     {t.amount.toFixed(2)}
                   </span>
@@ -92,10 +123,13 @@ export default async function ComptabilitePage() {
         )}
       </div>
 
-      <div>
-        <h2 className="mb-2 font-medium">Enregistrer une transaction</h2>
+      <Card className="p-5">
+        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-stone-500 dark:text-stone-400">
+          <Plus className="h-4 w-4" strokeWidth={2} />
+          Enregistrer une transaction
+        </h2>
         <CreateTransactionForm farms={managerFarms} />
-      </div>
+      </Card>
     </div>
   );
 }

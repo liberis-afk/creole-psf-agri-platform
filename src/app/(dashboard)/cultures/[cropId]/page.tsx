@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft, Trash2 } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { Card } from "@/components/ui/card";
 import { EditCropForm } from "./edit-form";
 import { deleteCrop, updateCrop } from "../actions";
 import { CropRecommendation } from "@/components/crop-recommendation";
@@ -46,35 +48,47 @@ export default async function CropDetailPage({
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <Link href="/cultures" className="text-sm opacity-70 hover:underline">
-          ← Toutes les cultures
+        <Link
+          href="/cultures"
+          className="mb-2 inline-flex items-center gap-1 text-sm text-muted hover:text-foreground"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" strokeWidth={2} />
+          Toutes les cultures
         </Link>
-        <h1 className="text-2xl font-semibold">{crop.name}</h1>
-        <p className="text-sm opacity-70">
+        <h1 className="text-2xl font-semibold tracking-tight text-stone-900 dark:text-stone-50">
+          {crop.name}
+        </h1>
+        <p className="text-sm text-muted">
           {crop.parcel.name} — {crop.parcel.farm.name}
         </p>
       </div>
 
       {canManage ? (
         <>
-          <EditCropForm
-            action={updateCrop.bind(null, crop.parcel.farmId, crop.id)}
-            crop={crop}
-          />
+          <Card className="p-5">
+            <EditCropForm
+              action={updateCrop.bind(null, crop.parcel.farmId, crop.id)}
+              crop={crop}
+            />
+          </Card>
           <form action={deleteCrop.bind(null, crop.parcel.farmId, crop.id)}>
-            <button type="submit" className="text-sm text-red-600 hover:underline">
+            <button
+              type="submit"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-red-600 hover:text-red-700 hover:underline"
+            >
+              <Trash2 className="h-3.5 w-3.5" strokeWidth={2} />
               Supprimer la culture
             </button>
           </form>
         </>
       ) : (
-        <div className="flex flex-col gap-2 text-sm">
+        <Card className="flex flex-col gap-2 p-5 text-sm">
           <p>Stade : {stageLabels[crop.stage] ?? crop.stage}</p>
           {crop.plantedAt && <p>Plantée le : {crop.plantedAt.toLocaleDateString("fr-FR")}</p>}
           {crop.harvestedAt && <p>Récoltée le : {crop.harvestedAt.toLocaleDateString("fr-FR")}</p>}
           {crop.expectedYield != null && <p>Rendement attendu : {crop.expectedYield}</p>}
           {crop.actualYield != null && <p>Rendement réel : {crop.actualYield}</p>}
-        </div>
+        </Card>
       )}
 
       <CropRecommendation cropId={crop.id} />

@@ -23,7 +23,7 @@ export function RoleSelectForm({
         name="role"
         defaultValue={defaultValue}
         onChange={() => formRef.current?.requestSubmit()}
-        className="rounded border border-black/20 px-2 py-1 text-sm dark:border-white/20"
+        className="rounded-lg border border-surface-border bg-surface px-2 py-1.5 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
       >
         {Object.entries(roleLabels).map(([value, label]) => (
           <option key={value} value={value}>

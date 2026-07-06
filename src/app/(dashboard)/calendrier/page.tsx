@@ -1,13 +1,24 @@
 import Link from "next/link";
+import { CalendarDays, Plus } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { CreateTaskForm } from "@/components/create-task-form";
+import { PageHeader } from "@/components/ui/page-header";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 const statusLabels: Record<string, string> = {
   A_FAIRE: "À faire",
   EN_COURS: "En cours",
   TERMINEE: "Terminée",
   ANNULEE: "Annulée",
+};
+
+const statusTones: Record<string, "neutral" | "primary" | "success" | "danger"> = {
+  A_FAIRE: "neutral",
+  EN_COURS: "primary",
+  TERMINEE: "success",
+  ANNULEE: "danger",
 };
 
 export default async function CalendrierPage() {
@@ -59,17 +70,17 @@ export default async function CalendrierPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div>
-        <h1 className="text-2xl font-semibold">Calendrier agricole</h1>
-        <p className="text-sm opacity-70">
-          Planification des tâches, rappels et historique des activités.
-        </p>
-      </div>
+      <PageHeader
+        title="Calendrier agricole"
+        description="Planification des tâches, rappels et historique des activités."
+      />
 
       <div>
-        <h2 className="mb-2 font-medium">Toutes les tâches</h2>
+        <h2 className="mb-3 text-sm font-semibold text-stone-500 dark:text-stone-400">
+          Toutes les tâches
+        </h2>
         {tasks.length === 0 ? (
-          <p className="text-sm opacity-70">Aucune tâche pour le moment.</p>
+          <Card className="p-6 text-sm text-muted">Aucune tâche pour le moment.</Card>
         ) : (
           <ul className="flex flex-col gap-2">
             {tasks.map((t) => {
@@ -78,14 +89,21 @@ export default async function CalendrierPage() {
                 <li key={t.id}>
                   <Link
                     href={`/calendrier/${t.id}`}
-                    className="flex items-center justify-between rounded border border-black/10 px-4 py-3 hover:bg-black/[.02] dark:border-white/10 dark:hover:bg-white/[.03]"
+                    className="flex items-center justify-between rounded-xl border border-surface-border bg-surface px-4 py-3 shadow-sm shadow-stone-900/[0.03] transition hover:-translate-y-0.5 hover:shadow-md hover:shadow-stone-900/[0.06]"
                   >
-                    <div>
-                      <p className="font-medium">{t.title}</p>
-                      <p className="text-sm opacity-70">{farm?.name}</p>
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary-soft-foreground">
+                        <CalendarDays className="h-4.5 w-4.5" strokeWidth={2} />
+                      </div>
+                      <div>
+                        <p className="font-medium">{t.title}</p>
+                        <p className="text-sm text-muted">{farm?.name}</p>
+                      </div>
                     </div>
-                    <div className="text-right text-sm opacity-70">
-                      <p>{statusLabels[t.status] ?? t.status}</p>
+                    <div className="flex flex-col items-end gap-1 text-right text-sm text-muted">
+                      <Badge tone={statusTones[t.status] ?? "neutral"}>
+                        {statusLabels[t.status] ?? t.status}
+                      </Badge>
                       {t.dueDate && <p>{t.dueDate.toLocaleDateString("fr-FR")}</p>}
                     </div>
                   </Link>
@@ -96,8 +114,11 @@ export default async function CalendrierPage() {
         )}
       </div>
 
-      <div>
-        <h2 className="mb-2 font-medium">Créer une tâche</h2>
+      <Card className="p-5">
+        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-stone-500 dark:text-stone-400">
+          <Plus className="h-4 w-4" strokeWidth={2} />
+          Créer une tâche
+        </h2>
         <CreateTaskForm
           parcels={availableParcels.map((p) => ({ id: p.id, name: p.name, farmName: p.farm.name }))}
           crops={availableCrops.map((c) => ({
@@ -107,7 +128,7 @@ export default async function CalendrierPage() {
             farmName: c.parcel.farm.name,
           }))}
         />
-      </div>
+      </Card>
     </div>
   );
 }

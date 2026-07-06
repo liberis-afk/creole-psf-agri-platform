@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Sparkles } from "lucide-react";
 import { getCropRecommendation } from "@/app/(dashboard)/cultures/[cropId]/ai-actions";
 
 export function CropRecommendation({ cropId }: { cropId: string }) {
@@ -22,17 +23,18 @@ export function CropRecommendation({ cropId }: { cropId: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
       <button
         onClick={handleClick}
         disabled={loading}
-        className="w-fit rounded border border-black/20 px-3 py-2 text-sm disabled:opacity-50 dark:border-white/20"
+        className="inline-flex w-fit items-center gap-2 rounded-lg bg-primary-soft px-3 py-2 text-sm font-medium text-primary-soft-foreground transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
       >
+        <Sparkles className="h-4 w-4" strokeWidth={2} />
         {loading ? "Analyse en cours..." : "Recommandation IA"}
       </button>
       {error && <p className="text-sm text-red-600">{error}</p>}
       {recommendation && (
-        <div className="whitespace-pre-wrap rounded border border-black/10 p-3 text-sm dark:border-white/10">
+        <div className="whitespace-pre-wrap rounded-xl border border-primary-soft bg-primary-soft/40 p-4 text-sm shadow-sm">
           {recommendation}
         </div>
       )}

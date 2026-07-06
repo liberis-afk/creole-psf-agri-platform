@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { Bot, Send, Sparkles } from "lucide-react";
+import { PageHeader } from "@/components/ui/page-header";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
@@ -60,28 +62,39 @@ export default function AssistantPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-3rem)] flex-col gap-4">
-      <div>
-        <h1 className="text-2xl font-semibold">Assistant IA</h1>
-        <p className="text-sm opacity-70">
-          Posez vos questions sur vos cultures, parcelles ou pratiques agricoles.
-        </p>
-      </div>
+    <div className="flex h-[calc(100vh-4rem)] flex-col gap-4">
+      <PageHeader
+        title="Assistant IA"
+        description="Posez vos questions sur vos cultures, parcelles ou pratiques agricoles."
+      />
 
-      <div className="flex-1 overflow-y-auto rounded border border-black/10 p-4 dark:border-white/10">
+      <div className="flex-1 overflow-y-auto rounded-xl border border-surface-border bg-surface p-4 shadow-sm shadow-stone-900/[0.03]">
         {messages.length === 0 ? (
-          <p className="text-sm opacity-70">
-            Exemple : « Quand dois-je récolter mon maïs planté le 1er juin ? »
-          </p>
+          <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-soft text-primary-soft-foreground">
+              <Sparkles className="h-6 w-6" strokeWidth={2} />
+            </div>
+            <p className="max-w-xs text-sm text-muted">
+              Exemple : « Quand dois-je récolter mon maïs planté le 1er juin ? »
+            </p>
+          </div>
         ) : (
           <div className="flex flex-col gap-4">
             {messages.map((m, i) => (
-              <div key={i} className={m.role === "user" ? "text-right" : "text-left"}>
+              <div
+                key={i}
+                className={`flex items-end gap-2 ${m.role === "user" ? "flex-row-reverse" : ""}`}
+              >
+                {m.role === "assistant" && (
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary-soft-foreground">
+                    <Bot className="h-4 w-4" strokeWidth={2} />
+                  </div>
+                )}
                 <p
-                  className={`inline-block max-w-[80%] whitespace-pre-wrap rounded px-3 py-2 text-sm ${
+                  className={`max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-sm ${
                     m.role === "user"
-                      ? "bg-foreground text-background"
-                      : "bg-black/5 dark:bg-white/10"
+                      ? "rounded-br-sm bg-primary text-primary-foreground"
+                      : "rounded-bl-sm bg-stone-100 text-foreground dark:bg-stone-800"
                   }`}
                 >
                   {m.content || "…"}
@@ -97,13 +110,14 @@ export default function AssistantPage() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Écrivez votre question..."
-          className="flex-1 rounded border border-black/20 px-3 py-2 dark:border-white/20"
+          className="flex-1 rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
         />
         <button
           type="submit"
           disabled={loading}
-          className="rounded bg-foreground px-4 py-2 text-background disabled:opacity-50"
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm shadow-emerald-900/10 transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
         >
+          <Send className="h-4 w-4" strokeWidth={2} />
           {loading ? "..." : "Envoyer"}
         </button>
       </form>

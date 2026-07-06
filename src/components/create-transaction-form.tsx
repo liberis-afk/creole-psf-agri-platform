@@ -7,7 +7,7 @@ export function CreateTransactionForm({
 }) {
   if (farms.length === 0) {
     return (
-      <p className="text-sm opacity-70">
+      <p className="text-sm text-muted">
         Vous devez être administrateur ou manager d&apos;une ferme pour enregistrer une
         transaction.
       </p>
@@ -19,7 +19,7 @@ export function CreateTransactionForm({
       <select
         name="farmId"
         required
-        className="rounded border border-black/20 px-3 py-2 dark:border-white/20"
+        className="rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
       >
         {farms.map((f) => (
           <option key={f.id} value={f.id}>
@@ -30,7 +30,7 @@ export function CreateTransactionForm({
       <select
         name="type"
         defaultValue="DEPENSE"
-        className="rounded border border-black/20 px-3 py-2 dark:border-white/20"
+        className="rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
       >
         <option value="DEPENSE">Dépense</option>
         <option value="REVENU">Revenu</option>
@@ -42,24 +42,24 @@ export function CreateTransactionForm({
         min="0.01"
         placeholder="Montant"
         required
-        className="rounded border border-black/20 px-3 py-2 dark:border-white/20"
+        className="rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
       />
       <input
         name="description"
         placeholder="Description (optionnel)"
-        className="rounded border border-black/20 px-3 py-2 dark:border-white/20"
+        className="rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
       />
-      <label className="flex flex-col gap-1 text-sm opacity-70">
+      <label className="flex flex-col gap-1 text-sm text-muted">
         Date
         <input
           name="date"
           type="date"
-          className="rounded border border-black/20 px-3 py-2 text-base opacity-100 dark:border-white/20"
+          className="rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
         />
       </label>
       <button
         type="submit"
-        className="rounded bg-foreground px-3 py-2 text-background"
+        className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm shadow-emerald-900/10 transition-colors hover:bg-primary-hover"
       >
         Enregistrer la transaction
       </button>

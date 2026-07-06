@@ -10,7 +10,7 @@ export const ParcelMap = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-full w-full items-center justify-center text-sm opacity-70">
+      <div className="flex h-full w-full items-center justify-center text-sm text-muted">
         Chargement de la carte...
       </div>
     ),

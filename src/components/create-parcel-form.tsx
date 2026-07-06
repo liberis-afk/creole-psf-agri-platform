@@ -22,7 +22,7 @@ export function CreateParcelForm({
 
   if (farms.length === 0) {
     return (
-      <p className="text-sm opacity-70">
+      <p className="text-sm text-muted">
         Vous devez être administrateur ou manager d&apos;une ferme pour créer une parcelle.
       </p>
     );
@@ -34,7 +34,7 @@ export function CreateParcelForm({
         <select
           name="farmId"
           required
-          className="rounded border border-black/20 px-3 py-2 dark:border-white/20"
+          className="rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
         >
           {farms.map((f) => (
             <option key={f.id} value={f.id}>
@@ -46,12 +46,12 @@ export function CreateParcelForm({
           name="name"
           placeholder="Nom de la parcelle"
           required
-          className="rounded border border-black/20 px-3 py-2 dark:border-white/20"
+          className="rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
         />
         <select
           name="soilType"
           defaultValue=""
-          className="rounded border border-black/20 px-3 py-2 dark:border-white/20"
+          className="rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
         >
           <option value="">Type de sol (optionnel)</option>
           {Object.entries(soilLabels).map(([value, label]) => (
@@ -66,18 +66,18 @@ export function CreateParcelForm({
           step="0.01"
           min="0"
           placeholder="Superficie (hectares)"
-          className="rounded border border-black/20 px-3 py-2 dark:border-white/20"
+          className="rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
         />
         <input type="hidden" name="latitude" value={position?.[0] ?? ""} />
         <input type="hidden" name="longitude" value={position?.[1] ?? ""} />
-        <p className="text-sm opacity-70">
+        <p className="text-sm text-muted">
           {position
             ? `Position choisie : ${position[0].toFixed(5)}, ${position[1].toFixed(5)}`
             : "Cliquez sur la carte pour situer la parcelle (optionnel)."}
         </p>
         <button
           type="submit"
-          className="rounded bg-foreground px-3 py-2 text-background"
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm shadow-emerald-900/10 transition-colors hover:bg-primary-hover"
         >
           Créer la parcelle
         </button>
@@ -87,7 +87,7 @@ export function CreateParcelForm({
         markers={[]}
         pickedPosition={position}
         onPick={(lat, lng) => setPosition([lat, lng])}
-        className="h-80 w-full flex-1 overflow-hidden rounded border border-black/10 dark:border-white/10"
+        className="h-80 w-full flex-1 overflow-hidden rounded-xl border border-surface-border shadow-sm shadow-stone-900/[0.03]"
       />
     </form>
   );

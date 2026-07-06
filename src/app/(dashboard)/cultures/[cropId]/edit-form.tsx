@@ -31,12 +31,12 @@ export function EditCropForm({
         name="name"
         defaultValue={crop.name}
         required
-        className="rounded border border-black/20 px-3 py-2 dark:border-white/20"
+        className="rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
       />
       <select
         name="stage"
         defaultValue={crop.stage}
-        className="rounded border border-black/20 px-3 py-2 dark:border-white/20"
+        className="rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
       >
         {Object.entries(stageLabels).map(([value, label]) => (
           <option key={value} value={value}>
@@ -44,22 +44,22 @@ export function EditCropForm({
           </option>
         ))}
       </select>
-      <label className="flex flex-col gap-1 text-sm opacity-70">
+      <label className="flex flex-col gap-1 text-sm text-muted">
         Date de plantation
         <input
           name="plantedAt"
           type="date"
           defaultValue={toDateInputValue(crop.plantedAt)}
-          className="rounded border border-black/20 px-3 py-2 text-base opacity-100 dark:border-white/20"
+          className="rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
         />
       </label>
-      <label className="flex flex-col gap-1 text-sm opacity-70">
+      <label className="flex flex-col gap-1 text-sm text-muted">
         Date de récolte
         <input
           name="harvestedAt"
           type="date"
           defaultValue={toDateInputValue(crop.harvestedAt)}
-          className="rounded border border-black/20 px-3 py-2 text-base opacity-100 dark:border-white/20"
+          className="rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
         />
       </label>
       <input
@@ -69,7 +69,7 @@ export function EditCropForm({
         min="0"
         defaultValue={crop.expectedYield ?? ""}
         placeholder="Rendement attendu"
-        className="rounded border border-black/20 px-3 py-2 dark:border-white/20"
+        className="rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
       />
       <input
         name="actualYield"
@@ -78,11 +78,11 @@ export function EditCropForm({
         min="0"
         defaultValue={crop.actualYield ?? ""}
         placeholder="Rendement réel"
-        className="rounded border border-black/20 px-3 py-2 dark:border-white/20"
+        className="rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
       />
       <button
         type="submit"
-        className="rounded bg-foreground px-3 py-2 text-background"
+        className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm shadow-emerald-900/10 transition-colors hover:bg-primary-hover"
       >
         Enregistrer
       </button>

@@ -1,7 +1,11 @@
 import Link from "next/link";
+import { Sprout, Plus } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { CreateCropForm } from "@/components/create-crop-form";
+import { PageHeader } from "@/components/ui/page-header";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 const stageLabels: Record<string, string> = {
   PLANIFIEE: "Planifiée",
@@ -9,6 +13,14 @@ const stageLabels: Record<string, string> = {
   EN_CROISSANCE: "En croissance",
   RECOLTEE: "Récoltée",
   ABANDONNEE: "Abandonnée",
+};
+
+const stageTones: Record<string, "neutral" | "primary" | "success" | "danger"> = {
+  PLANIFIEE: "neutral",
+  PLANTEE: "primary",
+  EN_CROISSANCE: "primary",
+  RECOLTEE: "success",
+  ABANDONNEE: "danger",
 };
 
 export default async function CulturesPage() {
@@ -44,32 +56,39 @@ export default async function CulturesPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div>
-        <h1 className="text-2xl font-semibold">Cultures</h1>
-        <p className="text-sm opacity-70">
-          Plantation, suivi agronomique, irrigation, fertilisation, récolte.
-        </p>
-      </div>
+      <PageHeader
+        title="Cultures"
+        description="Plantation, suivi agronomique, irrigation, fertilisation, récolte."
+      />
 
       <div>
-        <h2 className="mb-2 font-medium">Toutes les cultures</h2>
+        <h2 className="mb-3 text-sm font-semibold text-stone-500 dark:text-stone-400">
+          Toutes les cultures
+        </h2>
         {crops.length === 0 ? (
-          <p className="text-sm opacity-70">Aucune culture pour le moment.</p>
+          <Card className="p-6 text-sm text-muted">Aucune culture pour le moment.</Card>
         ) : (
           <ul className="flex flex-col gap-2">
             {crops.map((c) => (
               <li key={c.id}>
                 <Link
                   href={`/cultures/${c.id}`}
-                  className="flex items-center justify-between rounded border border-black/10 px-4 py-3 hover:bg-black/[.02] dark:border-white/10 dark:hover:bg-white/[.03]"
+                  className="flex items-center justify-between rounded-xl border border-surface-border bg-surface px-4 py-3 shadow-sm shadow-stone-900/[0.03] transition hover:-translate-y-0.5 hover:shadow-md hover:shadow-stone-900/[0.06]"
                 >
-                  <div>
-                    <p className="font-medium">{c.name}</p>
-                    <p className="text-sm opacity-70">
-                      {c.parcel.name} — {c.parcel.farm.name}
-                    </p>
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary-soft-foreground">
+                      <Sprout className="h-4.5 w-4.5" strokeWidth={2} />
+                    </div>
+                    <div>
+                      <p className="font-medium">{c.name}</p>
+                      <p className="text-sm text-muted">
+                        {c.parcel.name} — {c.parcel.farm.name}
+                      </p>
+                    </div>
                   </div>
-                  <span className="text-sm opacity-70">{stageLabels[c.stage] ?? c.stage}</span>
+                  <Badge tone={stageTones[c.stage] ?? "neutral"}>
+                    {stageLabels[c.stage] ?? c.stage}
+                  </Badge>
                 </Link>
               </li>
             ))}
@@ -77,12 +96,15 @@ export default async function CulturesPage() {
         )}
       </div>
 
-      <div>
-        <h2 className="mb-2 font-medium">Créer une culture</h2>
+      <Card className="p-5">
+        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-stone-500 dark:text-stone-400">
+          <Plus className="h-4 w-4" strokeWidth={2} />
+          Créer une culture
+        </h2>
         <CreateCropForm
           parcels={availableParcels.map((p) => ({ id: p.id, name: p.name, farmName: p.farm.name }))}
         />
-      </div>
+      </Card>
     </div>
   );
 }

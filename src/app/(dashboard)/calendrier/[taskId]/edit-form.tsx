@@ -28,19 +28,19 @@ export function EditTaskForm({
         name="title"
         defaultValue={task.title}
         required
-        className="rounded border border-black/20 px-3 py-2 dark:border-white/20"
+        className="rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
       />
       <textarea
         name="notes"
         defaultValue={task.notes ?? ""}
         placeholder="Notes (optionnel)"
         rows={3}
-        className="rounded border border-black/20 px-3 py-2 dark:border-white/20"
+        className="rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
       />
       <select
         name="status"
         defaultValue={task.status}
-        className="rounded border border-black/20 px-3 py-2 dark:border-white/20"
+        className="rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
       >
         {Object.entries(statusLabels).map(([value, label]) => (
           <option key={value} value={value}>
@@ -48,18 +48,18 @@ export function EditTaskForm({
           </option>
         ))}
       </select>
-      <label className="flex flex-col gap-1 text-sm opacity-70">
+      <label className="flex flex-col gap-1 text-sm text-muted">
         Échéance
         <input
           name="dueDate"
           type="date"
           defaultValue={toDateInputValue(task.dueDate)}
-          className="rounded border border-black/20 px-3 py-2 text-base opacity-100 dark:border-white/20"
+          className="rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
         />
       </label>
       <button
         type="submit"
-        className="rounded bg-foreground px-3 py-2 text-background"
+        className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm shadow-emerald-900/10 transition-colors hover:bg-primary-hover"
       >
         Enregistrer
       </button>

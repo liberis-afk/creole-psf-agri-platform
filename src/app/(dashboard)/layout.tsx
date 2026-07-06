@@ -1,16 +1,7 @@
-import Link from "next/link";
+import { Sprout } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { SignOutButton } from "@/components/sign-out-button";
-
-const modules = [
-  { href: "/fermes", label: "Fermes" },
-  { href: "/parcelles", label: "Parcelles" },
-  { href: "/cultures", label: "Cultures" },
-  { href: "/calendrier", label: "Calendrier" },
-  { href: "/inventaire", label: "Inventaire" },
-  { href: "/comptabilite", label: "Comptabilité" },
-  { href: "/assistant", label: "Assistant IA" },
-];
+import { SidebarNav } from "@/components/sidebar-nav";
 
 export default async function DashboardLayout({
   children,
@@ -21,25 +12,22 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex min-h-screen">
-      <nav className="flex w-56 shrink-0 flex-col justify-between border-r border-black/10 p-4 dark:border-white/10">
+      <nav className="flex w-60 shrink-0 flex-col justify-between border-r border-surface-border bg-surface p-4">
         <div>
-          <p className="mb-4 font-semibold">CREOLE PSF Agri</p>
-          <ul className="flex flex-col gap-2">
-            {modules.map((m) => (
-              <li key={m.href}>
-                <Link href={m.href} className="hover:underline">
-                  {m.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <div className="mb-6 flex items-center gap-2 px-1">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <Sprout className="h-4.5 w-4.5" strokeWidth={2.25} />
+            </div>
+            <p className="font-semibold tracking-tight">CREOLE PSF Agri</p>
+          </div>
+          <SidebarNav />
         </div>
-        <div className="flex flex-col gap-2 text-sm">
-          <p className="truncate opacity-70">{session?.user?.email}</p>
+        <div className="flex flex-col gap-2 border-t border-surface-border pt-4 text-sm">
+          <p className="truncate text-muted">{session?.user?.email}</p>
           <SignOutButton />
         </div>
       </nav>
-      <main className="flex-1 p-6">{children}</main>
+      <main className="flex-1 bg-background p-8">{children}</main>
     </div>
   );
 }

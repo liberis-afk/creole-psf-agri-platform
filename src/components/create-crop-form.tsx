@@ -15,7 +15,7 @@ export function CreateCropForm({
 }) {
   if (parcels.length === 0) {
     return (
-      <p className="text-sm opacity-70">
+      <p className="text-sm text-muted">
         Vous devez être administrateur ou manager d&apos;une ferme avec au moins une parcelle
         pour créer une culture.
       </p>
@@ -27,7 +27,7 @@ export function CreateCropForm({
       <select
         name="parcelId"
         required
-        className="rounded border border-black/20 px-3 py-2 dark:border-white/20"
+        className="rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
       >
         {parcels.map((p) => (
           <option key={p.id} value={p.id}>
@@ -39,12 +39,12 @@ export function CreateCropForm({
         name="name"
         placeholder="Nom de la culture"
         required
-        className="rounded border border-black/20 px-3 py-2 dark:border-white/20"
+        className="rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
       />
       <select
         name="stage"
         defaultValue="PLANIFIEE"
-        className="rounded border border-black/20 px-3 py-2 dark:border-white/20"
+        className="rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
       >
         {Object.entries(stageLabels).map(([value, label]) => (
           <option key={value} value={value}>
@@ -52,12 +52,12 @@ export function CreateCropForm({
           </option>
         ))}
       </select>
-      <label className="flex flex-col gap-1 text-sm opacity-70">
+      <label className="flex flex-col gap-1 text-sm text-muted">
         Date de plantation
         <input
           name="plantedAt"
           type="date"
-          className="rounded border border-black/20 px-3 py-2 text-base opacity-100 dark:border-white/20"
+          className="rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
         />
       </label>
       <input
@@ -66,11 +66,11 @@ export function CreateCropForm({
         step="0.01"
         min="0"
         placeholder="Rendement attendu (optionnel)"
-        className="rounded border border-black/20 px-3 py-2 dark:border-white/20"
+        className="rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
       />
       <button
         type="submit"
-        className="rounded bg-foreground px-3 py-2 text-background"
+        className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm shadow-emerald-900/10 transition-colors hover:bg-primary-hover"
       >
         Créer la culture
       </button>

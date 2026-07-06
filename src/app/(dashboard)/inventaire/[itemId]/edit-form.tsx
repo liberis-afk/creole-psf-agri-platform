@@ -24,12 +24,12 @@ export function EditInventoryForm({
         name="name"
         defaultValue={item.name}
         required
-        className="rounded border border-black/20 px-3 py-2 dark:border-white/20"
+        className="rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
       />
       <select
         name="category"
         defaultValue={item.category}
-        className="rounded border border-black/20 px-3 py-2 dark:border-white/20"
+        className="rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
       >
         {Object.entries(categoryLabels).map(([value, label]) => (
           <option key={value} value={value}>
@@ -45,18 +45,18 @@ export function EditInventoryForm({
           min="0"
           defaultValue={item.quantity}
           required
-          className="w-1/2 rounded border border-black/20 px-3 py-2 dark:border-white/20"
+          className="w-1/2 rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
         />
         <input
           name="unit"
           defaultValue={item.unit}
           required
-          className="w-1/2 rounded border border-black/20 px-3 py-2 dark:border-white/20"
+          className="w-1/2 rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
         />
       </div>
       <button
         type="submit"
-        className="rounded bg-foreground px-3 py-2 text-background"
+        className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm shadow-emerald-900/10 transition-colors hover:bg-primary-hover"
       >
         Enregistrer
       </button>

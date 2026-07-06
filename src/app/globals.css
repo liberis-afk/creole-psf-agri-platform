@@ -1,26 +1,61 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: var(--color-stone-50);
+  --foreground: var(--color-stone-900);
+  --surface: var(--color-white);
+  --surface-border: var(--color-stone-200);
+  --muted: var(--color-stone-500);
+
+  --primary: var(--color-emerald-600);
+  --primary-hover: var(--color-emerald-700);
+  --primary-foreground: var(--color-white);
+  --primary-soft: var(--color-emerald-50);
+  --primary-soft-foreground: var(--color-emerald-800);
+  --ring: var(--color-emerald-500);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-border: var(--surface-border);
+  --color-muted: var(--muted);
+
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-soft-foreground: var(--primary-soft-foreground);
+  --color-ring: var(--ring);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: var(--color-stone-950);
+    --foreground: var(--color-stone-100);
+    --surface: var(--color-stone-900);
+    --surface-border: var(--color-stone-800);
+    --muted: var(--color-stone-400);
+
+    --primary: var(--color-emerald-500);
+    --primary-hover: var(--color-emerald-400);
+    --primary-foreground: var(--color-stone-950);
+    --primary-soft: color-mix(in oklab, var(--color-emerald-500) 16%, transparent);
+    --primary-soft-foreground: var(--color-emerald-300);
+    --ring: var(--color-emerald-400);
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+::selection {
+  background: var(--primary-soft);
+  color: var(--primary-soft-foreground);
 }
