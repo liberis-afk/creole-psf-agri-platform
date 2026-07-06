@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { CalendarRange, Plus } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -48,22 +49,24 @@ export default async function SaisonsPage() {
         ) : (
           <ul className="flex flex-col gap-2">
             {enCours.map((s) => (
-              <li
-                key={s.id}
-                className="flex items-center justify-between rounded-xl border border-surface-border bg-surface px-4 py-3 shadow-sm shadow-stone-900/[0.03]"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary-soft-foreground">
-                    <CalendarRange className="h-4.5 w-4.5" strokeWidth={2} />
+              <li key={s.id}>
+                <Link
+                  href={`/saisons/${s.id}`}
+                  className="flex items-center justify-between rounded-xl border border-surface-border bg-surface px-4 py-3 shadow-sm shadow-stone-900/[0.03] transition hover:-translate-y-0.5 hover:shadow-md hover:shadow-stone-900/[0.06]"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary-soft-foreground">
+                      <CalendarRange className="h-4.5 w-4.5" strokeWidth={2} />
+                    </div>
+                    <div>
+                      <p className="font-medium">
+                        {s.nom} {s.annee}
+                      </p>
+                      <p className="text-sm text-muted">{s.farm.name}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium">
-                      {s.nom} {s.annee}
-                    </p>
-                    <p className="text-sm text-muted">{s.farm.name}</p>
-                  </div>
-                </div>
-                <Badge tone="primary">En cours</Badge>
+                  <Badge tone="primary">En cours</Badge>
+                </Link>
               </li>
             ))}
           </ul>
@@ -77,17 +80,19 @@ export default async function SaisonsPage() {
           </h2>
           <ul className="flex flex-col gap-2">
             {historique.map((s) => (
-              <li
-                key={s.id}
-                className="flex items-center justify-between rounded-xl border border-surface-border bg-surface px-4 py-3 shadow-sm shadow-stone-900/[0.03]"
-              >
-                <div>
-                  <p className="font-medium">
-                    {s.nom} {s.annee}
-                  </p>
-                  <p className="text-sm text-muted">{s.farm.name}</p>
-                </div>
-                <Badge tone="neutral">Terminée</Badge>
+              <li key={s.id}>
+                <Link
+                  href={`/saisons/${s.id}`}
+                  className="flex items-center justify-between rounded-xl border border-surface-border bg-surface px-4 py-3 shadow-sm shadow-stone-900/[0.03] transition hover:-translate-y-0.5 hover:shadow-md hover:shadow-stone-900/[0.06]"
+                >
+                  <div>
+                    <p className="font-medium">
+                      {s.nom} {s.annee}
+                    </p>
+                    <p className="text-sm text-muted">{s.farm.name}</p>
+                  </div>
+                  <Badge tone="neutral">Terminée</Badge>
+                </Link>
               </li>
             ))}
           </ul>
