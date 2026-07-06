@@ -26,7 +26,7 @@ export default async function TaskDetailPage({
     where: { id: taskId },
     include: {
       parcel: { include: { farm: true } },
-      crop: { include: { parcel: { include: { farm: true } } } },
+      crop: { include: { parcelle: { include: { farm: true } } } },
     },
   });
 
@@ -34,7 +34,7 @@ export default async function TaskDetailPage({
     notFound();
   }
 
-  const farm = task.parcel?.farm ?? task.crop?.parcel.farm;
+  const farm = task.parcel?.farm ?? task.crop?.parcelle.farm;
 
   const membership = session?.user?.id && farm
     ? await prisma.membership.findUnique({
@@ -64,7 +64,7 @@ export default async function TaskDetailPage({
         <p className="text-sm text-muted">
           {farm.name}
           {task.parcel && ` — ${task.parcel.name}`}
-          {task.crop && ` — ${task.crop.name}`}
+          {task.crop && ` — ${task.crop.nomCulture}`}
         </p>
       </div>
 

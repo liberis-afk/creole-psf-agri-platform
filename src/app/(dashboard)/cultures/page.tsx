@@ -2,24 +2,20 @@ import Link from "next/link";
 import { Sprout, Plus } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { CreateCropForm } from "@/components/create-crop-form";
+import { CreateCultureForm } from "@/components/create-culture-form";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-const stageLabels: Record<string, string> = {
-  PLANIFIEE: "Planifiée",
-  PLANTEE: "Plantée",
-  EN_CROISSANCE: "En croissance",
-  RECOLTEE: "Récoltée",
+const statusLabels: Record<string, string> = {
+  EN_COURS: "En cours",
+  TERMINEE: "Terminée",
   ABANDONNEE: "Abandonnée",
 };
 
-const stageTones: Record<string, "neutral" | "primary" | "success" | "danger"> = {
-  PLANIFIEE: "neutral",
-  PLANTEE: "primary",
-  EN_CROISSANCE: "primary",
-  RECOLTEE: "success",
+const statusTones: Record<string, "neutral" | "primary" | "success" | "danger"> = {
+  EN_COURS: "primary",
+  TERMINEE: "success",
   ABANDONNEE: "danger",
 };
 
@@ -38,16 +34,16 @@ export default async function CulturesPage() {
     .filter((m) => m.role === "ADMIN" || m.role === "MANAGER")
     .map((m) => m.farmId);
 
-  const crops = farmIds.length
-    ? await prisma.crop.findMany({
-        where: { parcel: { farmId: { in: farmIds } } },
-        include: { parcel: { include: { farm: true } } },
+  const cultures = farmIds.length
+    ? await prisma.culture.findMany({
+        where: { parcelle: { farmId: { in: farmIds } } },
+        include: { parcelle: { include: { farm: true } } },
         orderBy: { createdAt: "desc" },
       })
     : [];
 
-  const availableParcels = managerFarmIds.length
-    ? await prisma.parcel.findMany({
+  const availableParcelles = managerFarmIds.length
+    ? await prisma.parcelle.findMany({
         where: { farmId: { in: managerFarmIds } },
         include: { farm: true },
         orderBy: { name: "asc" },
@@ -65,11 +61,11 @@ export default async function CulturesPage() {
         <h2 className="mb-3 text-sm font-semibold text-stone-500 dark:text-stone-400">
           Toutes les cultures
         </h2>
-        {crops.length === 0 ? (
+        {cultures.length === 0 ? (
           <Card className="p-6 text-sm text-muted">Aucune culture pour le moment.</Card>
         ) : (
           <ul className="flex flex-col gap-2">
-            {crops.map((c) => (
+            {cultures.map((c) => (
               <li key={c.id}>
                 <Link
                   href={`/cultures/${c.id}`}
@@ -80,14 +76,14 @@ export default async function CulturesPage() {
                       <Sprout className="h-4.5 w-4.5" strokeWidth={2} />
                     </div>
                     <div>
-                      <p className="font-medium">{c.name}</p>
+                      <p className="font-medium">{c.nomCulture}</p>
                       <p className="text-sm text-muted">
-                        {c.parcel.name} — {c.parcel.farm.name}
+                        {c.parcelle.name} — {c.parcelle.farm.name}
                       </p>
                     </div>
                   </div>
-                  <Badge tone={stageTones[c.stage] ?? "neutral"}>
-                    {stageLabels[c.stage] ?? c.stage}
+                  <Badge tone={statusTones[c.statut] ?? "neutral"}>
+                    {statusLabels[c.statut] ?? c.statut}
                   </Badge>
                 </Link>
               </li>
@@ -101,8 +97,8 @@ export default async function CulturesPage() {
           <Plus className="h-4 w-4" strokeWidth={2} />
           Créer une culture
         </h2>
-        <CreateCropForm
-          parcels={availableParcels.map((p) => ({ id: p.id, name: p.name, farmName: p.farm.name }))}
+        <CreateCultureForm
+          parcelles={availableParcelles.map((p) => ({ id: p.id, name: p.name, farmName: p.farm.name }))}
         />
       </Card>
     </div>

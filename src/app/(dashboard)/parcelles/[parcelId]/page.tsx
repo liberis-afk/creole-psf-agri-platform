@@ -4,8 +4,8 @@ import { ArrowLeft, Trash2 } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Card } from "@/components/ui/card";
-import { EditParcelForm } from "./edit-form";
-import { deleteParcel, updateParcel } from "../actions";
+import { EditParcelleForm } from "./edit-form";
+import { deleteParcelle, updateParcelle } from "../actions";
 
 const soilLabels: Record<string, string> = {
   ARGILEUX: "Argileux",
@@ -24,18 +24,18 @@ export default async function ParcelDetailPage({
   const { parcelId } = await params;
   const session = await auth();
 
-  const parcel = await prisma.parcel.findUnique({
+  const parcelle = await prisma.parcelle.findUnique({
     where: { id: parcelId },
     include: { farm: true },
   });
 
-  if (!parcel) {
+  if (!parcelle) {
     notFound();
   }
 
   const membership = session?.user?.id
     ? await prisma.membership.findUnique({
-        where: { userId_farmId: { userId: session.user.id, farmId: parcel.farmId } },
+        where: { userId_farmId: { userId: session.user.id, farmId: parcelle.farmId } },
       })
     : null;
 
@@ -56,20 +56,20 @@ export default async function ParcelDetailPage({
           Toutes les parcelles
         </Link>
         <h1 className="text-2xl font-semibold tracking-tight text-stone-900 dark:text-stone-50">
-          {parcel.name}
+          {parcelle.name}
         </h1>
-        <p className="text-sm text-muted">{parcel.farm.name}</p>
+        <p className="text-sm text-muted">{parcelle.farm.name}</p>
       </div>
 
       {canManage ? (
         <>
           <Card className="p-5">
-            <EditParcelForm
-              action={updateParcel.bind(null, parcel.farmId, parcel.id)}
-              parcel={parcel}
+            <EditParcelleForm
+              action={updateParcelle.bind(null, parcelle.farmId, parcelle.id)}
+              parcelle={parcelle}
             />
           </Card>
-          <form action={deleteParcel.bind(null, parcel.farmId, parcel.id)}>
+          <form action={deleteParcelle.bind(null, parcelle.farmId, parcelle.id)}>
             <button
               type="submit"
               className="inline-flex items-center gap-1.5 text-sm font-medium text-red-600 hover:text-red-700 hover:underline"
@@ -81,11 +81,11 @@ export default async function ParcelDetailPage({
         </>
       ) : (
         <Card className="flex flex-col gap-2 p-5 text-sm">
-          {parcel.soilType && <p>Type de sol : {soilLabels[parcel.soilType] ?? parcel.soilType}</p>}
-          {parcel.area != null && <p>Superficie : {parcel.area} ha</p>}
-          {parcel.latitude != null && parcel.longitude != null && (
+          {parcelle.soilType && <p>Type de sol : {soilLabels[parcelle.soilType] ?? parcelle.soilType}</p>}
+          {parcelle.area != null && <p>Superficie : {parcelle.area} ha</p>}
+          {parcelle.latitude != null && parcelle.longitude != null && (
             <p>
-              Position : {parcel.latitude.toFixed(5)}, {parcel.longitude.toFixed(5)}
+              Position : {parcelle.latitude.toFixed(5)}, {parcelle.longitude.toFixed(5)}
             </p>
           )}
         </Card>

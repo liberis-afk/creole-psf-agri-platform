@@ -2,7 +2,7 @@ import Link from "next/link";
 import { MapPin, Plus } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { CreateParcelForm } from "@/components/create-parcel-form";
+import { CreateParcelleForm } from "@/components/create-parcelle-form";
 import { ParcelMap } from "@/components/parcel-map-loader";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
@@ -29,7 +29,7 @@ export default async function ParcellesPage() {
   const farmIds = memberships.map((m) => m.farmId);
 
   const parcels = farmIds.length
-    ? await prisma.parcel.findMany({
+    ? await prisma.parcelle.findMany({
         where: { farmId: { in: farmIds } },
         include: { farm: true },
         orderBy: { createdAt: "desc" },
@@ -102,7 +102,7 @@ export default async function ParcellesPage() {
           <Plus className="h-4 w-4" strokeWidth={2} />
           Créer une parcelle
         </h2>
-        <CreateParcelForm farms={managerFarms} />
+        <CreateParcelleForm farms={managerFarms} />
       </Card>
     </div>
   );

@@ -12,12 +12,12 @@ const soilLabels: Record<string, string> = {
   AUTRE: "Autre",
 };
 
-export function EditParcelForm({
+export function EditParcelleForm({
   action,
-  parcel,
+  parcelle,
 }: {
   action: (formData: FormData) => void | Promise<void>;
-  parcel: {
+  parcelle: {
     name: string;
     soilType: string | null;
     area: number | null;
@@ -26,8 +26,8 @@ export function EditParcelForm({
   };
 }) {
   const [position, setPosition] = useState<[number, number] | null>(
-    parcel.latitude != null && parcel.longitude != null
-      ? [parcel.latitude, parcel.longitude]
+    parcelle.latitude != null && parcelle.longitude != null
+      ? [parcelle.latitude, parcelle.longitude]
       : null,
   );
 
@@ -36,13 +36,13 @@ export function EditParcelForm({
       <div className="flex w-full max-w-sm flex-col gap-3">
         <input
           name="name"
-          defaultValue={parcel.name}
+          defaultValue={parcelle.name}
           required
           className="rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
         />
         <select
           name="soilType"
-          defaultValue={parcel.soilType ?? ""}
+          defaultValue={parcelle.soilType ?? ""}
           className="rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
         >
           <option value="">Type de sol (optionnel)</option>
@@ -57,7 +57,7 @@ export function EditParcelForm({
           type="number"
           step="0.01"
           min="0"
-          defaultValue={parcel.area ?? ""}
+          defaultValue={parcelle.area ?? ""}
           placeholder="Superficie (hectares)"
           className="rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/30"
         />

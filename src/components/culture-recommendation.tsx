@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { Sparkles } from "lucide-react";
-import { getCropRecommendation } from "@/app/(dashboard)/cultures/[cropId]/ai-actions";
+import { getCultureRecommendation } from "@/app/(dashboard)/cultures/[cultureId]/ai-actions";
 
-export function CropRecommendation({ cropId }: { cropId: string }) {
+export function CultureRecommendation({ cultureId }: { cultureId: string }) {
   const [recommendation, setRecommendation] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -13,7 +13,7 @@ export function CropRecommendation({ cropId }: { cropId: string }) {
     setLoading(true);
     setError(null);
     try {
-      const text = await getCropRecommendation(cropId);
+      const text = await getCultureRecommendation(cultureId);
       setRecommendation(text);
     } catch {
       setError("Impossible d'obtenir une recommandation pour le moment.");

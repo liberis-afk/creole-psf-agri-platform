@@ -36,7 +36,7 @@ function parseFloatOrNull(value: FormDataEntryValue | null) {
   return Number.isFinite(n) ? n : null;
 }
 
-export async function createParcel(formData: FormData) {
+export async function createParcelle(formData: FormData) {
   const farmId = formData.get("farmId");
   if (typeof farmId !== "string" || !farmId) {
     throw new Error("Ferme requise");
@@ -49,7 +49,7 @@ export async function createParcel(formData: FormData) {
     throw new Error("Le nom de la parcelle est requis");
   }
 
-  await prisma.parcel.create({
+  await prisma.parcelle.create({
     data: {
       farmId,
       name: name.trim(),
@@ -63,11 +63,11 @@ export async function createParcel(formData: FormData) {
   revalidatePath("/parcelles");
 }
 
-export async function updateParcel(farmId: string, parcelId: string, formData: FormData) {
+export async function updateParcelle(farmId: string, parcelleId: string, formData: FormData) {
   await requireFarmManager(farmId);
 
-  const parcel = await prisma.parcel.findUnique({ where: { id: parcelId } });
-  if (!parcel || parcel.farmId !== farmId) {
+  const parcelle = await prisma.parcelle.findUnique({ where: { id: parcelleId } });
+  if (!parcelle || parcelle.farmId !== farmId) {
     throw new Error("Parcelle introuvable");
   }
 
@@ -76,8 +76,8 @@ export async function updateParcel(farmId: string, parcelId: string, formData: F
     throw new Error("Le nom de la parcelle est requis");
   }
 
-  await prisma.parcel.update({
-    where: { id: parcelId },
+  await prisma.parcelle.update({
+    where: { id: parcelleId },
     data: {
       name: name.trim(),
       latitude: parseFloatOrNull(formData.get("latitude")),
@@ -88,18 +88,18 @@ export async function updateParcel(farmId: string, parcelId: string, formData: F
   });
 
   revalidatePath("/parcelles");
-  revalidatePath(`/parcelles/${parcelId}`);
+  revalidatePath(`/parcelles/${parcelleId}`);
 }
 
-export async function deleteParcel(farmId: string, parcelId: string) {
+export async function deleteParcelle(farmId: string, parcelleId: string) {
   await requireFarmManager(farmId);
 
-  const parcel = await prisma.parcel.findUnique({ where: { id: parcelId } });
-  if (!parcel || parcel.farmId !== farmId) {
+  const parcelle = await prisma.parcelle.findUnique({ where: { id: parcelleId } });
+  if (!parcelle || parcelle.farmId !== farmId) {
     throw new Error("Parcelle introuvable");
   }
 
-  await prisma.parcel.delete({ where: { id: parcelId } });
+  await prisma.parcelle.delete({ where: { id: parcelleId } });
 
   revalidatePath("/parcelles");
   redirect("/parcelles");

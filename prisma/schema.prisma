@@ -25,12 +25,18 @@ enum SoilType {
   AUTRE
 }
 
-enum CropStage {
-  PLANIFIEE
-  PLANTEE
-  EN_CROISSANCE
-  RECOLTEE
+enum CultureStatus {
+  EN_COURS
+  TERMINEE
   ABANDONNEE
+}
+
+enum ActiviteType {
+  PLANTATION
+  IRRIGATION
+  APPLICATION
+  CULTIVATION
+  RECOLTE
 }
 
 enum TaskStatus {
@@ -114,6 +120,7 @@ model User {
   sessions        Session[]
   memberships     Membership[]
   sentInvitations Invitation[]
+  activitesCreees Activite[]
 }
 
 /// Isole chaque ferme : chaque utilisateur appartient à une ou plusieurs fermes via Membership.
@@ -125,7 +132,7 @@ model Farm {
   updatedAt DateTime @updatedAt
 
   memberships  Membership[]
-  parcels      Parcel[]
+  parcelles    Parcelle[]
   inventory    InventoryItem[]
   transactions Transaction[]
   invitations  Invitation[]
@@ -145,7 +152,7 @@ model Membership {
   @@unique([userId, farmId])
 }
 
-model Parcel {
+model Parcelle {
   id        String    @id @default(cuid())
   name      String
   latitude  Float?
@@ -158,25 +165,44 @@ model Parcel {
   farmId String
   farm   Farm   @relation(fields: [farmId], references: [id], onDelete: Cascade)
 
-  crops Crop[]
-  tasks Task[]
+  cultures Culture[]
+  tasks    Task[]
 }
 
-model Crop {
-  id           String    @id @default(cuid())
-  name         String
-  stage        CropStage @default(PLANIFIEE)
-  plantedAt    DateTime?
-  harvestedAt  DateTime?
-  expectedYield Float?
-  actualYield   Float?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+model Culture {
+  id         String        @id @default(cuid())
+  parcelleId String
+  parcelle   Parcelle      @relation(fields: [parcelleId], references: [id], onDelete: Cascade)
+  saisonId   String?
+  nomCulture String
+  variete    String?
+  dateDebut  DateTime?
+  dateFin    DateTime?
+  statut     CultureStatus @default(EN_COURS)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
 
-  parcelId String
-  parcel   Parcel @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+  activites Activite[]
+  tasks     Task[]
 
-  tasks Task[]
+  @@index([parcelleId, statut])
+}
+
+model Activite {
+  id          String       @id @default(cuid())
+  cultureId   String
+  culture     Culture      @relation(fields: [cultureId], references: [id], onDelete: Cascade)
+  type        ActiviteType
+  date        DateTime
+  notes       String?
+  quantite    Float?
+  unite       String?
+  createdById String
+  createdBy   User         @relation(fields: [createdById], references: [id])
+  createdAt   DateTime     @default(now())
+
+  @@index([cultureId])
+  @@index([type])
 }
 
 model Task {
@@ -189,10 +215,10 @@ model Task {
   updatedAt DateTime   @updatedAt
 
   parcelId String?
-  parcel   Parcel? @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+  parcel   Parcelle? @relation(fields: [parcelId], references: [id], onDelete: Cascade)
 
   cropId String?
-  crop   Crop?   @relation(fields: [cropId], references: [id], onDelete: Cascade)
+  crop   Culture? @relation(fields: [cropId], references: [id], onDelete: Cascade)
 }
 
 model InventoryItem {

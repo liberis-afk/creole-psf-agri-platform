@@ -18,8 +18,10 @@ describe("Calendrier actions", () => {
     const user = await createTestUser("task-" + role.toLowerCase());
     const farm = await createTestFarm();
     await addMembership(user.id, farm.id, role);
-    const parcel = await prisma.parcel.create({ data: { farmId: farm.id, name: "Parcelle" } });
-    const crop = await prisma.crop.create({ data: { parcelId: parcel.id, name: "Culture" } });
+    const parcel = await prisma.parcelle.create({ data: { farmId: farm.id, name: "Parcelle" } });
+    const crop = await prisma.culture.create({
+      data: { parcelleId: parcel.id, nomCulture: "Culture" },
+    });
     userIds.push(user.id);
     farmIds.push(farm.id);
     return { user, farm, parcel, crop };

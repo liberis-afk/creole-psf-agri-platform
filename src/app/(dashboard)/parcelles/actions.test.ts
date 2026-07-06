@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { createParcel, updateParcel, deleteParcel } from "./actions";
+import { createParcelle, updateParcelle, deleteParcelle } from "./actions";
 import { createTestUser, createTestFarm, addMembership, cleanup } from "@/test/helpers";
 
 const mockedAuth = vi.mocked(auth);
@@ -23,7 +23,7 @@ describe("Parcelles actions", () => {
     return { user, farm };
   }
 
-  it("lets a manager create a parcel", async () => {
+  it("lets a manager create a parcelle", async () => {
     const { user, farm } = await setupFarm("MANAGER");
     mockedAuth.mockResolvedValue({ user: { id: user.id } } as never);
 
@@ -35,10 +35,10 @@ describe("Parcelles actions", () => {
     formData.set("latitude", "19.1");
     formData.set("longitude", "-72.2");
 
-    await createParcel(formData);
+    await createParcelle(formData);
 
-    const parcel = await prisma.parcel.findFirstOrThrow({ where: { farmId: farm.id } });
-    expect(parcel).toMatchObject({
+    const parcelle = await prisma.parcelle.findFirstOrThrow({ where: { farmId: farm.id } });
+    expect(parcelle).toMatchObject({
       name: "Parcelle Test",
       soilType: "ARGILEUX",
       area: 1.5,
@@ -47,7 +47,7 @@ describe("Parcelles actions", () => {
     });
   });
 
-  it("rejects an employee creating a parcel", async () => {
+  it("rejects an employee creating a parcelle", async () => {
     const { user, farm } = await setupFarm("EMPLOYEE");
     mockedAuth.mockResolvedValue({ user: { id: user.id } } as never);
 
@@ -55,48 +55,54 @@ describe("Parcelles actions", () => {
     formData.set("farmId", farm.id);
     formData.set("name", "Parcelle Interdite");
 
-    await expect(createParcel(formData)).rejects.toThrow(/réservée aux administrateurs et managers/i);
+    await expect(createParcelle(formData)).rejects.toThrow(
+      /réservée aux administrateurs et managers/i,
+    );
   });
 
-  it("updates a parcel's fields", async () => {
+  it("updates a parcelle's fields", async () => {
     const { user, farm } = await setupFarm("ADMIN");
     mockedAuth.mockResolvedValue({ user: { id: user.id } } as never);
 
-    const parcel = await prisma.parcel.create({ data: { farmId: farm.id, name: "Avant" } });
+    const parcelle = await prisma.parcelle.create({ data: { farmId: farm.id, name: "Avant" } });
 
     const formData = new FormData();
     formData.set("name", "Après");
     formData.set("soilType", "SABLEUX");
     formData.set("area", "2");
 
-    await updateParcel(farm.id, parcel.id, formData);
+    await updateParcelle(farm.id, parcelle.id, formData);
 
-    const updated = await prisma.parcel.findUniqueOrThrow({ where: { id: parcel.id } });
+    const updated = await prisma.parcelle.findUniqueOrThrow({ where: { id: parcelle.id } });
     expect(updated).toMatchObject({ name: "Après", soilType: "SABLEUX", area: 2 });
   });
 
-  it("refuses to update a parcel belonging to a different farm", async () => {
+  it("refuses to update a parcelle belonging to a different farm", async () => {
     const { user, farm } = await setupFarm("ADMIN");
     const { farm: otherFarm } = await setupFarm("ADMIN");
     mockedAuth.mockResolvedValue({ user: { id: user.id } } as never);
 
-    const otherParcel = await prisma.parcel.create({ data: { farmId: otherFarm.id, name: "Autre" } });
+    const otherParcelle = await prisma.parcelle.create({
+      data: { farmId: otherFarm.id, name: "Autre" },
+    });
 
     const formData = new FormData();
     formData.set("name", "Piraté");
 
-    await expect(updateParcel(farm.id, otherParcel.id, formData)).rejects.toThrow(/introuvable/i);
+    await expect(updateParcelle(farm.id, otherParcelle.id, formData)).rejects.toThrow(
+      /introuvable/i,
+    );
   });
 
-  it("deletes a parcel and redirects", async () => {
+  it("deletes a parcelle and redirects", async () => {
     const { user, farm } = await setupFarm("ADMIN");
     mockedAuth.mockResolvedValue({ user: { id: user.id } } as never);
 
-    const parcel = await prisma.parcel.create({ data: { farmId: farm.id, name: "À supprimer" } });
+    const parcelle = await prisma.parcelle.create({ data: { farmId: farm.id, name: "À supprimer" } });
 
-    await expect(deleteParcel(farm.id, parcel.id)).rejects.toThrow("NEXT_REDIRECT:/parcelles");
+    await expect(deleteParcelle(farm.id, parcelle.id)).rejects.toThrow("NEXT_REDIRECT:/parcelles");
 
-    const found = await prisma.parcel.findUnique({ where: { id: parcel.id } });
+    const found = await prisma.parcelle.findUnique({ where: { id: parcelle.id } });
     expect(found).toBeNull();
   });
 });

@@ -41,30 +41,30 @@ export default async function CalendrierPage() {
         where: {
           OR: [
             { parcel: { farmId: { in: farmIds } } },
-            { crop: { parcel: { farmId: { in: farmIds } } } },
+            { crop: { parcelle: { farmId: { in: farmIds } } } },
           ],
         },
         include: {
           parcel: { include: { farm: true } },
-          crop: { include: { parcel: { include: { farm: true } } } },
+          crop: { include: { parcelle: { include: { farm: true } } } },
         },
         orderBy: [{ dueDate: "asc" }, { createdAt: "desc" }],
       })
     : [];
 
-  const availableParcels = managerFarmIds.length
-    ? await prisma.parcel.findMany({
+  const availableParcelles = managerFarmIds.length
+    ? await prisma.parcelle.findMany({
         where: { farmId: { in: managerFarmIds } },
         include: { farm: true },
         orderBy: { name: "asc" },
       })
     : [];
 
-  const availableCrops = managerFarmIds.length
-    ? await prisma.crop.findMany({
-        where: { parcel: { farmId: { in: managerFarmIds } } },
-        include: { parcel: { include: { farm: true } } },
-        orderBy: { name: "asc" },
+  const availableCultures = managerFarmIds.length
+    ? await prisma.culture.findMany({
+        where: { parcelle: { farmId: { in: managerFarmIds } } },
+        include: { parcelle: { include: { farm: true } } },
+        orderBy: { nomCulture: "asc" },
       })
     : [];
 
@@ -84,7 +84,7 @@ export default async function CalendrierPage() {
         ) : (
           <ul className="flex flex-col gap-2">
             {tasks.map((t) => {
-              const farm = t.parcel?.farm ?? t.crop?.parcel.farm;
+              const farm = t.parcel?.farm ?? t.crop?.parcelle.farm;
               return (
                 <li key={t.id}>
                   <Link
@@ -120,12 +120,12 @@ export default async function CalendrierPage() {
           Créer une tâche
         </h2>
         <CreateTaskForm
-          parcels={availableParcels.map((p) => ({ id: p.id, name: p.name, farmName: p.farm.name }))}
-          crops={availableCrops.map((c) => ({
+          parcels={availableParcelles.map((p) => ({ id: p.id, name: p.name, farmName: p.farm.name }))}
+          crops={availableCultures.map((c) => ({
             id: c.id,
-            name: c.name,
-            parcelName: c.parcel.name,
-            farmName: c.parcel.farm.name,
+            name: c.nomCulture,
+            parcelName: c.parcelle.name,
+            farmName: c.parcelle.farm.name,
           }))}
         />
       </Card>

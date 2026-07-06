@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ParcelMap } from "./parcel-map-loader";
-import { createParcel } from "@/app/(dashboard)/parcelles/actions";
+import { createParcelle } from "@/app/(dashboard)/parcelles/actions";
 
 const soilLabels: Record<string, string> = {
   ARGILEUX: "Argileux",
@@ -13,7 +13,7 @@ const soilLabels: Record<string, string> = {
   AUTRE: "Autre",
 };
 
-export function CreateParcelForm({
+export function CreateParcelleForm({
   farms,
 }: {
   farms: { id: string; name: string }[];
@@ -29,7 +29,7 @@ export function CreateParcelForm({
   }
 
   return (
-    <form action={createParcel} className="flex flex-col gap-4 md:flex-row">
+    <form action={createParcelle} className="flex flex-col gap-4 md:flex-row">
       <div className="flex w-full max-w-sm flex-col gap-3">
         <select
           name="farmId"

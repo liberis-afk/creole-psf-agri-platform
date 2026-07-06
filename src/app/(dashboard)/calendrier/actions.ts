@@ -48,15 +48,18 @@ export async function createTask(formData: FormData) {
   let farmId: string;
 
   if (targetType === "crop") {
-    const crop = await prisma.crop.findUnique({ where: { id: targetId }, include: { parcel: true } });
+    const crop = await prisma.culture.findUnique({
+      where: { id: targetId },
+      include: { parcelle: true },
+    });
     if (!crop) {
       throw new Error("Culture introuvable");
     }
     cropId = crop.id;
-    parcelId = crop.parcelId;
-    farmId = crop.parcel.farmId;
+    parcelId = crop.parcelleId;
+    farmId = crop.parcelle.farmId;
   } else {
-    const parcel = await prisma.parcel.findUnique({ where: { id: targetId } });
+    const parcel = await prisma.parcelle.findUnique({ where: { id: targetId } });
     if (!parcel) {
       throw new Error("Parcelle introuvable");
     }
@@ -90,10 +93,10 @@ export async function createTask(formData: FormData) {
 async function assertTaskBelongsToFarm(taskId: string, farmId: string) {
   const task = await prisma.task.findUnique({
     where: { id: taskId },
-    include: { parcel: true, crop: { include: { parcel: true } } },
+    include: { parcel: true, crop: { include: { parcelle: true } } },
   });
 
-  const taskFarmId = task?.parcel?.farmId ?? task?.crop?.parcel.farmId;
+  const taskFarmId = task?.parcel?.farmId ?? task?.crop?.parcelle.farmId;
   if (!task || taskFarmId !== farmId) {
     throw new Error("Tâche introuvable");
   }

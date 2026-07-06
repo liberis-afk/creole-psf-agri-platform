@@ -12,7 +12,7 @@ export async function buildFarmContext(): Promise<string> {
     include: {
       farm: {
         include: {
-          parcels: { include: { crops: true } },
+          parcelles: { include: { cultures: true } },
         },
       },
     },
@@ -25,13 +25,13 @@ export async function buildFarmContext(): Promise<string> {
   const lines: string[] = [];
   for (const m of memberships) {
     lines.push(`Ferme "${m.farm.name}" (${m.farm.location ?? "localisation inconnue"}), rôle de l'utilisateur : ${m.role}`);
-    for (const parcel of m.farm.parcels) {
+    for (const parcelle of m.farm.parcelles) {
       lines.push(
-        `  - Parcelle "${parcel.name}"${parcel.soilType ? `, sol ${parcel.soilType}` : ""}${parcel.area ? `, ${parcel.area} ha` : ""}`,
+        `  - Parcelle "${parcelle.name}"${parcelle.soilType ? `, sol ${parcelle.soilType}` : ""}${parcelle.area ? `, ${parcelle.area} ha` : ""}`,
       );
-      for (const crop of parcel.crops) {
+      for (const culture of parcelle.cultures) {
         lines.push(
-          `      - Culture "${crop.name}", stade ${crop.stage}${crop.plantedAt ? `, plantée le ${crop.plantedAt.toISOString().slice(0, 10)}` : ""}${crop.expectedYield ? `, rendement attendu ${crop.expectedYield}` : ""}`,
+          `      - Culture "${culture.nomCulture}", statut ${culture.statut}${culture.dateDebut ? `, début le ${culture.dateDebut.toISOString().slice(0, 10)}` : ""}`,
         );
       }
     }

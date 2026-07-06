@@ -4,23 +4,23 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { anthropic, AI_MODEL } from "@/lib/anthropic";
 
-export async function getCropRecommendation(cropId: string): Promise<string> {
+export async function getCultureRecommendation(cultureId: string): Promise<string> {
   const session = await auth();
   if (!session?.user?.id) {
     throw new Error("Non authentifié");
   }
 
-  const crop = await prisma.crop.findUnique({
-    where: { id: cropId },
-    include: { parcel: { include: { farm: true } } },
+  const culture = await prisma.culture.findUnique({
+    where: { id: cultureId },
+    include: { parcelle: { include: { farm: true } } },
   });
 
-  if (!crop) {
+  if (!culture) {
     throw new Error("Culture introuvable");
   }
 
   const membership = await prisma.membership.findUnique({
-    where: { userId_farmId: { userId: session.user.id, farmId: crop.parcel.farmId } },
+    where: { userId_farmId: { userId: session.user.id, farmId: culture.parcelle.farmId } },
   });
 
   if (!membership) {
@@ -28,14 +28,13 @@ export async function getCropRecommendation(cropId: string): Promise<string> {
   }
 
   const details = [
-    `Culture : ${crop.name}`,
-    `Stade : ${crop.stage}`,
-    crop.plantedAt ? `Plantée le : ${crop.plantedAt.toISOString().slice(0, 10)}` : null,
-    crop.harvestedAt ? `Récoltée le : ${crop.harvestedAt.toISOString().slice(0, 10)}` : null,
-    crop.expectedYield != null ? `Rendement attendu : ${crop.expectedYield}` : null,
-    crop.actualYield != null ? `Rendement réel : ${crop.actualYield}` : null,
-    `Parcelle : ${crop.parcel.name}${crop.parcel.soilType ? ` (sol ${crop.parcel.soilType})` : ""}`,
-    `Ferme : ${crop.parcel.farm.name}${crop.parcel.farm.location ? ` — ${crop.parcel.farm.location}` : ""}`,
+    `Culture : ${culture.nomCulture}`,
+    culture.variete ? `Variété : ${culture.variete}` : null,
+    `Statut : ${culture.statut}`,
+    culture.dateDebut ? `Début : ${culture.dateDebut.toISOString().slice(0, 10)}` : null,
+    culture.dateFin ? `Fin : ${culture.dateFin.toISOString().slice(0, 10)}` : null,
+    `Parcelle : ${culture.parcelle.name}${culture.parcelle.soilType ? ` (sol ${culture.parcelle.soilType})` : ""}`,
+    `Ferme : ${culture.parcelle.farm.name}${culture.parcelle.farm.location ? ` — ${culture.parcelle.farm.location}` : ""}`,
   ]
     .filter(Boolean)
     .join("\n");

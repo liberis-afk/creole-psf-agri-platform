@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { createCrop, updateCrop, deleteCrop } from "./actions";
+import { createCulture, updateCulture, terminerCulture, deleteCulture } from "./actions";
 import { createTestUser, createTestFarm, addMembership, cleanup } from "@/test/helpers";
 
 const mockedAuth = vi.mocked(auth);
@@ -14,63 +14,98 @@ describe("Cultures actions", () => {
     await cleanup(farmIds.splice(0), userIds.splice(0));
   });
 
-  async function setupFarmWithParcel(role: "ADMIN" | "MANAGER" | "EMPLOYEE" = "ADMIN") {
-    const user = await createTestUser("crop-" + role.toLowerCase());
+  async function setupFarmWithParcelle(role: "ADMIN" | "MANAGER" | "EMPLOYEE" = "ADMIN") {
+    const user = await createTestUser("culture-" + role.toLowerCase());
     const farm = await createTestFarm();
     await addMembership(user.id, farm.id, role);
-    const parcel = await prisma.parcel.create({ data: { farmId: farm.id, name: "Parcelle" } });
+    const parcelle = await prisma.parcelle.create({ data: { farmId: farm.id, name: "Parcelle" } });
     userIds.push(user.id);
     farmIds.push(farm.id);
-    return { user, farm, parcel };
+    return { user, farm, parcelle };
   }
 
-  it("lets a manager create a crop on their parcel", async () => {
-    const { user, parcel } = await setupFarmWithParcel("MANAGER");
+  it("lets a manager create a culture on their parcelle", async () => {
+    const { user, parcelle } = await setupFarmWithParcelle("MANAGER");
     mockedAuth.mockResolvedValue({ user: { id: user.id } } as never);
 
     const formData = new FormData();
-    formData.set("parcelId", parcel.id);
-    formData.set("name", "Maïs");
-    formData.set("stage", "PLANTEE");
-    formData.set("plantedAt", "2026-06-01");
-    formData.set("expectedYield", "1200");
+    formData.set("parcelleId", parcelle.id);
+    formData.set("nomCulture", "Maïs");
+    formData.set("variete", "Local");
+    formData.set("dateDebut", "2026-06-01");
 
-    await createCrop(formData);
+    await createCulture(formData);
 
-    const crop = await prisma.crop.findFirstOrThrow({ where: { parcelId: parcel.id } });
-    expect(crop).toMatchObject({ name: "Maïs", stage: "PLANTEE", expectedYield: 1200 });
-    expect(crop.plantedAt?.toISOString().slice(0, 10)).toBe("2026-06-01");
+    const culture = await prisma.culture.findFirstOrThrow({ where: { parcelleId: parcelle.id } });
+    expect(culture).toMatchObject({ nomCulture: "Maïs", variete: "Local", statut: "EN_COURS" });
+    expect(culture.dateDebut?.toISOString().slice(0, 10)).toBe("2026-06-01");
   });
 
-  it("rejects an employee creating a crop", async () => {
-    const { user, parcel } = await setupFarmWithParcel("EMPLOYEE");
+  it("rejects an employee creating a culture", async () => {
+    const { user, parcelle } = await setupFarmWithParcelle("EMPLOYEE");
     mockedAuth.mockResolvedValue({ user: { id: user.id } } as never);
 
     const formData = new FormData();
-    formData.set("parcelId", parcel.id);
-    formData.set("name", "Interdit");
+    formData.set("parcelleId", parcelle.id);
+    formData.set("nomCulture", "Interdit");
 
-    await expect(createCrop(formData)).rejects.toThrow(/réservée aux administrateurs et managers/i);
+    await expect(createCulture(formData)).rejects.toThrow(
+      /réservée aux administrateurs et managers/i,
+    );
   });
 
-  it("updates and deletes a crop", async () => {
-    const { user, farm, parcel } = await setupFarmWithParcel("ADMIN");
+  it("rejects a second EN_COURS culture on the same parcelle", async () => {
+    const { user, parcelle } = await setupFarmWithParcelle("ADMIN");
     mockedAuth.mockResolvedValue({ user: { id: user.id } } as never);
 
-    const crop = await prisma.crop.create({ data: { parcelId: parcel.id, name: "Avant" } });
+    await prisma.culture.create({ data: { parcelleId: parcelle.id, nomCulture: "Première" } });
+
+    const formData = new FormData();
+    formData.set("parcelleId", parcelle.id);
+    formData.set("nomCulture", "Deuxième");
+
+    await expect(createCulture(formData)).rejects.toThrow(/déjà une culture en cours/i);
+  });
+
+  it("allows a new culture once the previous one is terminée", async () => {
+    const { user, farm, parcelle } = await setupFarmWithParcelle("ADMIN");
+    mockedAuth.mockResolvedValue({ user: { id: user.id } } as never);
+
+    const first = await prisma.culture.create({
+      data: { parcelleId: parcelle.id, nomCulture: "Première" },
+    });
+    await terminerCulture(farm.id, first.id);
+
+    const formData = new FormData();
+    formData.set("parcelleId", parcelle.id);
+    formData.set("nomCulture", "Deuxième");
+
+    await expect(createCulture(formData)).resolves.not.toThrow();
+
+    const updatedFirst = await prisma.culture.findUniqueOrThrow({ where: { id: first.id } });
+    expect(updatedFirst.statut).toBe("TERMINEE");
+    expect(updatedFirst.dateFin).not.toBeNull();
+  });
+
+  it("updates and deletes a culture", async () => {
+    const { user, farm, parcelle } = await setupFarmWithParcelle("ADMIN");
+    mockedAuth.mockResolvedValue({ user: { id: user.id } } as never);
+
+    const culture = await prisma.culture.create({
+      data: { parcelleId: parcelle.id, nomCulture: "Avant" },
+    });
 
     const updateFormData = new FormData();
-    updateFormData.set("name", "Après");
-    updateFormData.set("stage", "RECOLTEE");
-    updateFormData.set("actualYield", "900");
+    updateFormData.set("nomCulture", "Après");
+    updateFormData.set("statut", "TERMINEE");
 
-    await updateCrop(farm.id, crop.id, updateFormData);
+    await updateCulture(farm.id, culture.id, updateFormData);
 
-    const updated = await prisma.crop.findUniqueOrThrow({ where: { id: crop.id } });
-    expect(updated).toMatchObject({ name: "Après", stage: "RECOLTEE", actualYield: 900 });
+    const updated = await prisma.culture.findUniqueOrThrow({ where: { id: culture.id } });
+    expect(updated).toMatchObject({ nomCulture: "Après", statut: "TERMINEE" });
 
-    await expect(deleteCrop(farm.id, crop.id)).rejects.toThrow("NEXT_REDIRECT:/cultures");
-    const found = await prisma.crop.findUnique({ where: { id: crop.id } });
+    await expect(deleteCulture(farm.id, culture.id)).rejects.toThrow("NEXT_REDIRECT:/cultures");
+    const found = await prisma.culture.findUnique({ where: { id: culture.id } });
     expect(found).toBeNull();
   });
 });

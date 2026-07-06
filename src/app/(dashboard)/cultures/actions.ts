@@ -5,10 +5,10 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-const STAGES = ["PLANIFIEE", "PLANTEE", "EN_CROISSANCE", "RECOLTEE", "ABANDONNEE"] as const;
-type Stage = (typeof STAGES)[number];
+const STATUSES = ["EN_COURS", "TERMINEE", "ABANDONNEE"] as const;
+type Status = (typeof STATUSES)[number];
 
-async function requireFarmManager(farmId: string) {
+export async function requireFarmManager(farmId: string) {
   const session = await auth();
   if (!session?.user?.id) {
     throw new Error("Non authentifié");
@@ -21,19 +21,15 @@ async function requireFarmManager(farmId: string) {
   if (!membership || (membership.role !== "ADMIN" && membership.role !== "MANAGER")) {
     throw new Error("Action réservée aux administrateurs et managers de la ferme");
   }
+
+  return session.user.id;
 }
 
-function parseStage(value: FormDataEntryValue | null): Stage {
-  if (typeof value === "string" && (STAGES as readonly string[]).includes(value)) {
-    return value as Stage;
+function parseStatus(value: FormDataEntryValue | null): Status {
+  if (typeof value === "string" && (STATUSES as readonly string[]).includes(value)) {
+    return value as Status;
   }
-  return "PLANIFIEE";
-}
-
-function parseFloatOrNull(value: FormDataEntryValue | null) {
-  if (typeof value !== "string" || value.trim() === "") return null;
-  const n = Number(value);
-  return Number.isFinite(n) ? n : null;
+  return "EN_COURS";
 }
 
 function parseDateOrNull(value: FormDataEntryValue | null) {
@@ -42,75 +38,114 @@ function parseDateOrNull(value: FormDataEntryValue | null) {
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
-export async function createCrop(formData: FormData) {
-  const parcelId = formData.get("parcelId");
-  if (typeof parcelId !== "string" || !parcelId) {
+export async function createCulture(formData: FormData) {
+  const parcelleId = formData.get("parcelleId");
+  if (typeof parcelleId !== "string" || !parcelleId) {
     throw new Error("Parcelle requise");
   }
 
-  const parcel = await prisma.parcel.findUnique({ where: { id: parcelId } });
-  if (!parcel) {
+  const parcelle = await prisma.parcelle.findUnique({ where: { id: parcelleId } });
+  if (!parcelle) {
     throw new Error("Parcelle introuvable");
   }
 
-  await requireFarmManager(parcel.farmId);
+  await requireFarmManager(parcelle.farmId);
 
-  const name = formData.get("name");
-  if (typeof name !== "string" || !name.trim()) {
+  const nomCulture = formData.get("nomCulture");
+  if (typeof nomCulture !== "string" || !nomCulture.trim()) {
     throw new Error("Le nom de la culture est requis");
   }
 
-  await prisma.crop.create({
+  const activeCulture = await prisma.culture.findFirst({
+    where: { parcelleId, statut: "EN_COURS" },
+  });
+  if (activeCulture) {
+    throw new Error("Cette parcelle a déjà une culture en cours");
+  }
+
+  const variete = formData.get("variete");
+
+  await prisma.culture.create({
     data: {
-      parcelId,
-      name: name.trim(),
-      stage: parseStage(formData.get("stage")),
-      plantedAt: parseDateOrNull(formData.get("plantedAt")),
-      expectedYield: parseFloatOrNull(formData.get("expectedYield")),
+      parcelleId,
+      nomCulture: nomCulture.trim(),
+      variete: typeof variete === "string" && variete.trim() ? variete.trim() : null,
+      dateDebut: parseDateOrNull(formData.get("dateDebut")),
     },
   });
 
   revalidatePath("/cultures");
 }
 
-export async function updateCrop(farmId: string, cropId: string, formData: FormData) {
+export async function updateCulture(farmId: string, cultureId: string, formData: FormData) {
   await requireFarmManager(farmId);
 
-  const crop = await prisma.crop.findUnique({ where: { id: cropId }, include: { parcel: true } });
-  if (!crop || crop.parcel.farmId !== farmId) {
+  const culture = await prisma.culture.findUnique({
+    where: { id: cultureId },
+    include: { parcelle: true },
+  });
+  if (!culture || culture.parcelle.farmId !== farmId) {
     throw new Error("Culture introuvable");
   }
 
-  const name = formData.get("name");
-  if (typeof name !== "string" || !name.trim()) {
+  const nomCulture = formData.get("nomCulture");
+  if (typeof nomCulture !== "string" || !nomCulture.trim()) {
     throw new Error("Le nom de la culture est requis");
   }
 
-  await prisma.crop.update({
-    where: { id: cropId },
+  const variete = formData.get("variete");
+
+  await prisma.culture.update({
+    where: { id: cultureId },
     data: {
-      name: name.trim(),
-      stage: parseStage(formData.get("stage")),
-      plantedAt: parseDateOrNull(formData.get("plantedAt")),
-      harvestedAt: parseDateOrNull(formData.get("harvestedAt")),
-      expectedYield: parseFloatOrNull(formData.get("expectedYield")),
-      actualYield: parseFloatOrNull(formData.get("actualYield")),
+      nomCulture: nomCulture.trim(),
+      variete: typeof variete === "string" && variete.trim() ? variete.trim() : null,
+      statut: parseStatus(formData.get("statut")),
+      dateDebut: parseDateOrNull(formData.get("dateDebut")),
+      dateFin: parseDateOrNull(formData.get("dateFin")),
     },
   });
 
   revalidatePath("/cultures");
-  revalidatePath(`/cultures/${cropId}`);
+  revalidatePath(`/cultures/${cultureId}`);
 }
 
-export async function deleteCrop(farmId: string, cropId: string) {
+export async function terminerCulture(farmId: string, cultureId: string) {
   await requireFarmManager(farmId);
 
-  const crop = await prisma.crop.findUnique({ where: { id: cropId }, include: { parcel: true } });
-  if (!crop || crop.parcel.farmId !== farmId) {
+  const culture = await prisma.culture.findUnique({
+    where: { id: cultureId },
+    include: { parcelle: true },
+  });
+  if (!culture || culture.parcelle.farmId !== farmId) {
     throw new Error("Culture introuvable");
   }
 
-  await prisma.crop.delete({ where: { id: cropId } });
+  if (culture.statut !== "EN_COURS") {
+    throw new Error("Cette culture n'est pas en cours");
+  }
+
+  await prisma.culture.update({
+    where: { id: cultureId },
+    data: { statut: "TERMINEE", dateFin: culture.dateFin ?? new Date() },
+  });
+
+  revalidatePath("/cultures");
+  revalidatePath(`/cultures/${cultureId}`);
+}
+
+export async function deleteCulture(farmId: string, cultureId: string) {
+  await requireFarmManager(farmId);
+
+  const culture = await prisma.culture.findUnique({
+    where: { id: cultureId },
+    include: { parcelle: true },
+  });
+  if (!culture || culture.parcelle.farmId !== farmId) {
+    throw new Error("Culture introuvable");
+  }
+
+  await prisma.culture.delete({ where: { id: cultureId } });
 
   revalidatePath("/cultures");
   redirect("/cultures");
